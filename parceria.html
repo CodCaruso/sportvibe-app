@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="SportVibe — Sistema de agendamento gratuito para arenas esportivas em Blumenau. Novos clientes pelo app, sem custo fixo. Você só paga quando o app gerar a reserva."/>
+  <meta name="theme-color" content="#6C63FF"/>
+  <meta property="og:title" content="SportVibe — Parceria para arenas"/>
+  <meta property="og:description" content="Sistema de agendamento gratuito + novos clientes pelo app. Comissão de 10% só sobre reservas geradas pelo SportVibe."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:locale" content="pt_BR"/>
+  <title>SportVibe — Parceria para arenas esportivas</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236C63FF'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='Arial'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#080810;--bg2:#0f0f1a;--surface:#1a1a2e;--surface2:#22223a;
+      --border:rgba(255,255,255,0.07);--primary:#6C63FF;--primary2:#8B5CF6;
+      --accent:#06D6A0;--warn:#FFB703;--danger:#FF4D6D;
+      --text:#F0F0FF;--text2:#9090B0;--text3:#5a5a7a;
+    }
+    html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;border:none;cursor:pointer;}
+
+    /* GRADIENT BACKGROUND */
+    body{
+      background:
+        radial-gradient(ellipse 800px 600px at 50% -10%, rgba(108,99,255,0.25), transparent 60%),
+        radial-gradient(ellipse 600px 400px at 100% 30%, rgba(139,92,246,0.18), transparent 60%),
+        var(--bg);
+    }
+
+    .wrap{max-width:680px;margin:0 auto;padding:32px 20px 60px;}
+
+    /* HERO */
+    .hero{text-align:center;padding:24px 0 48px;}
+    .logo-row{display:inline-flex;align-items:center;gap:12px;margin-bottom:32px;}
+    .logo-badge{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 32px rgba(108,99,255,0.4);}
+    .logo-text{font-size:22px;font-weight:900;letter-spacing:-0.5px;}
+    .logo-sub{font-size:11px;color:var(--primary);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+    .hero-tag{display:inline-block;background:rgba(108,99,255,0.12);color:var(--primary);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:20px;border:1px solid rgba(108,99,255,0.25);}
+    h1{font-size:36px;font-weight:900;letter-spacing:-1.2px;line-height:1.15;margin-bottom:18px;}
+    h1 .gradient{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .hero-desc{font-size:17px;color:var(--text2);max-width:520px;margin:0 auto;line-height:1.55;}
+
+    @media(min-width:600px){h1{font-size:44px;}.hero-desc{font-size:18px;}}
+
+    /* SECTIONS */
+    section{margin-bottom:48px;}
+    .section-label{display:inline-block;font-size:11px;color:var(--primary);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+    h2{font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:24px;line-height:1.25;}
+    @media(min-width:600px){h2{font-size:28px;}}
+
+    /* BENEFITS CARDS */
+    .benefits{display:grid;gap:14px;}
+    .benefit{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;gap:16px;align-items:flex-start;transition:border-color 0.25s, transform 0.25s;}
+    .benefit:hover{border-color:rgba(108,99,255,0.4);transform:translateY(-2px);}
+    .benefit-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .benefit:nth-child(1) .benefit-icon{background:rgba(6,214,160,0.15);}
+    .benefit:nth-child(2) .benefit-icon{background:rgba(108,99,255,0.15);}
+    .benefit:nth-child(3) .benefit-icon{background:rgba(255,183,3,0.15);}
+    .benefit-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+    .benefit-desc{font-size:14px;color:var(--text2);line-height:1.5;}
+    .benefit-highlight{color:var(--accent);font-weight:700;}
+
+    /* STEPS */
+    .steps{display:grid;gap:16px;counter-reset:stepc;}
+    .step{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px 22px 22px 70px;position:relative;}
+    .step::before{counter-increment:stepc;content:counter(stepc);position:absolute;left:20px;top:22px;width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:white;}
+    .step-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+    .step-desc{font-size:14px;color:var(--text2);line-height:1.5;}
+
+    /* DEMO BUTTONS */
+    .demo-row{display:grid;gap:14px;}
+    @media(min-width:520px){.demo-row{grid-template-columns:1fr 1fr;}}
+    .demo-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:22px 18px;text-align:center;transition:all 0.25s;cursor:pointer;display:block;}
+    .demo-btn:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 12px 32px rgba(108,99,255,0.15);}
+    .demo-emoji{font-size:32px;margin-bottom:10px;display:block;}
+    .demo-label{font-size:11px;color:var(--primary);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+    .demo-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+    .demo-desc{font-size:13px;color:var(--text2);}
+
+    /* CTA */
+    .cta-box{background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(139,92,246,0.08));border:1px solid rgba(108,99,255,0.3);border-radius:22px;padding:32px 24px;text-align:center;}
+    .cta-title{font-size:22px;font-weight:900;letter-spacing:-0.4px;margin-bottom:10px;}
+    .cta-desc{font-size:15px;color:var(--text2);margin-bottom:24px;max-width:440px;margin-left:auto;margin-right:auto;}
+    .cta-actions{display:flex;flex-direction:column;gap:10px;align-items:center;}
+    @media(min-width:520px){.cta-actions{flex-direction:row;justify-content:center;}}
+    .btn{padding:14px 24px;border-radius:14px;font-size:15px;font-weight:800;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;box-shadow:0 8px 28px rgba(108,99,255,0.4);}
+    .btn-primary:hover{box-shadow:0 12px 36px rgba(108,99,255,0.55);transform:translateY(-1px);}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+    .btn svg{width:18px;height:18px;}
+
+    /* SCARCITY */
+    .scarcity{background:rgba(255,183,3,0.08);border:1px solid rgba(255,183,3,0.25);border-radius:14px;padding:14px 18px;display:flex;gap:12px;align-items:center;font-size:14px;color:var(--text);}
+    .scarcity-icon{font-size:20px;flex-shrink:0;}
+    .scarcity strong{color:var(--warn);}
+
+    /* FOOTER / CONTACT */
+    .contact{margin-top:36px;padding-top:32px;border-top:1px solid var(--border);text-align:center;}
+    .contact-name{font-size:15px;font-weight:700;margin-bottom:2px;}
+    .contact-role{font-size:13px;color:var(--text2);margin-bottom:14px;}
+    .contact-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+    .contact-chip{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--text2);display:inline-flex;align-items:center;gap:6px;transition:border-color 0.2s,color 0.2s;}
+    .contact-chip:hover{border-color:var(--primary);color:var(--text);}
+
+    .footer{margin-top:32px;text-align:center;font-size:11px;color:var(--text3);}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="logo-row">
+      <div class="logo-badge">⚡</div>
+      <div style="text-align:left">
+        <div class="logo-text">SportVibe</div>
+        <div class="logo-sub">Programa de parceria</div>
+      </div>
+    </div>
+    <div class="hero-tag">Para arenas esportivas de Blumenau</div>
+    <h1>Sua arena no app que vai <span class="gradient">conectar Blumenau</span> ao esporte.</h1>
+    <p class="hero-desc">O SportVibe é um app social que ajuda atletas amadores a encontrar parceiros, formar times e reservar quadras — tudo num só lugar. E sua arena entra de graça.</p>
+  </header>
+
+  <!-- BENEFÍCIOS -->
+  <section>
+    <span class="section-label">Por que entrar</span>
+    <h2>O que sua arena ganha sendo parceira</h2>
+    <div class="benefits">
+      <div class="benefit">
+        <div class="benefit-icon">🆓</div>
+        <div>
+          <div class="benefit-title">Sistema de agendamento gratuito</div>
+          <div class="benefit-desc">Painel completo pra gerenciar reservas, quadras, horários, agenda semanal e financeiro. <span class="benefit-highlight">R$ 0 de mensalidade</span> — pra sempre.</div>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">📱</div>
+        <div>
+          <div class="benefit-title">Novos clientes pelo app</div>
+          <div class="benefit-desc">Atletas amadores em Blumenau descobrem sua arena no app, reservam horários e pagam direto. Sem você gastar nada em marketing.</div>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">💳</div>
+        <div>
+          <div class="benefit-title">Pagamentos seguros, comissão honesta</div>
+          <div class="benefit-desc">Pagamentos processados pelo <strong>MercadoPago</strong> (mesma plataforma do Mercado Livre e iFood). Você só paga <span class="benefit-highlight">10% de comissão</span> quando a reserva vier pelo app. Reservas suas (WhatsApp, telefone, balcão) ficam 100% suas.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section>
+    <span class="section-label">Como funciona</span>
+    <h2>3 passos para começar</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-title">Você cadastra suas quadras no painel</div>
+        <div class="step-desc">Em ~15 minutos: nome, esportes disponíveis, preço por hora, foto. Sem cobrança, sem cartão de crédito.</div>
+      </div>
+      <div class="step">
+        <div class="step-title">Suas quadras aparecem para usuários do app em Blumenau</div>
+        <div class="step-desc">Quando um atleta procurar onde jogar, sua arena aparece com horários disponíveis e avaliações.</div>
+      </div>
+      <div class="step">
+        <div class="step-title">Reservas e pagamentos chegam automáticos</div>
+        <div class="step-desc">O dinheiro cai na sua conta MercadoPago semanalmente, já descontada a comissão de 10% — só sobre o que vier pelo app.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMOS -->
+  <section>
+    <span class="section-label">Veja funcionando</span>
+    <h2>Demo ao vivo, sem cadastro</h2>
+    <div class="demo-row">
+      <a href="/" class="demo-btn" target="_blank" rel="noopener">
+        <span class="demo-emoji">🏟️</span>
+        <div class="demo-label">App do atleta</div>
+        <div class="demo-title">Como seus clientes vão usar</div>
+        <div class="demo-desc">Buscar parceiros, ver quadras, reservar.</div>
+      </a>
+      <a href="/arena" class="demo-btn" target="_blank" rel="noopener">
+        <span class="demo-emoji">📊</span>
+        <div class="demo-label">Painel da arena</div>
+        <div class="demo-title">O que sua arena vai gerenciar</div>
+        <div class="demo-desc">Reservas, agenda, financeiro, quadras.</div>
+      </a>
+    </div>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:14px;">Dica: abra o link do app no celular pra ver como ele realmente é.</p>
+  </section>
+
+  <!-- ESCASSEZ -->
+  <section>
+    <div class="scarcity">
+      <span class="scarcity-icon">🚀</span>
+      <div>Estamos fechando as <strong>primeiras parcerias em Blumenau agora</strong>. Quem entra primeiro tem condições especiais e prioridade no app.</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-box">
+      <div class="cta-title">Bora marcar uma conversa?</div>
+      <p class="cta-desc">Eu vou na sua arena, mostro o app e o painel funcionando no celular, e a gente vê se faz sentido pra você. Sem compromisso.</p>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="https://wa.me/5547991142099?text=Ol%C3%A1%20Mateus%2C%20vi%20o%20SportVibe%20e%20queria%20conversar%20sobre%20a%20parceria%20pra%20minha%20arena." target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.465.13-.615.136-.135.301-.345.451-.523.146-.181.194-.301.297-.496.1-.21.049-.375-.025-.524-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.51-.172-.015-.371-.015-.571-.015-.2 0-.523.074-.797.359-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.18 2.095 3.195 5.076 4.485.713.3 1.27.48 1.704.629.714.227 1.365.195 1.88.121.574-.091 1.767-.721 2.016-1.426.255-.705.255-1.29.18-1.425-.074-.135-.27-.21-.57-.345m-5.446 7.443h-.016a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Conversar pelo WhatsApp
+        </a>
+        <a class="btn btn-outline" href="mailto:mateussoruca@gmail.com?subject=SportVibe%20%E2%80%94%20Parceria%20arena&body=Ol%C3%A1%20Mateus%2C%20queria%20conversar%20sobre%20a%20parceria%20do%20SportVibe%20pra%20minha%20arena.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          E-mail
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <div class="contact">
+    <div class="contact-name">Mateus Caruso</div>
+    <div class="contact-role">Fundador, SportVibe · Blumenau, SC</div>
+    <div class="contact-links">
+      <a class="contact-chip" href="https://wa.me/5547991142099" target="_blank" rel="noopener">📱 (47) 9 9114-2099</a>
+      <a class="contact-chip" href="mailto:mateussoruca@gmail.com">✉️ mateussoruca@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2026 SportVibe Tecnologia e Serviços · Sua tribo esportiva te espera
+  </div>
+
+</div>
+</body>
+</html>
