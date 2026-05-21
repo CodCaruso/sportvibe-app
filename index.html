@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SportVibe</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#080810" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SportVibe" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#080810; --bg2:#0f0f1a; --bg3:#16162a; --surface:#1a1a2e; --surface2:#22223a;
+      --border:rgba(255,255,255,0.07); --primary:#6C63FF; --primary2:#8B5CF6;
+      --accent:#06D6A0; --danger:#FF4D6D; --warn:#FFB703;
+      --text:#F0F0FF; --text2:#9090B0; --text3:#5a5a7a;
+      --gold:#FFD700; --silver:#C0C0D0; --bronze:#CD7F32;
+      --radius:16px; --radius-sm:10px; --shadow:0 8px 32px rgba(0,0,0,0.5);
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden;}
+    button{font-family:inherit;cursor:pointer;border:none;outline:none;}
+    input,select{font-family:inherit;outline:none;border:none;}
+    ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+    #app{width:100%;max-width:430px;height:100dvh;margin:0 auto;position:relative;overflow:hidden;background:var(--bg);}
+
+    /* STATUS BAR */
+    .status-bar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12px;font-weight:600;color:var(--text);background:var(--bg);position:relative;z-index:10;}
+    .battery{width:22px;height:11px;border:1.5px solid var(--text);border-radius:2px;position:relative;}
+    .battery::after{content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:2px;height:5px;background:var(--text);border-radius:0 1px 1px 0;}
+    .battery-fill{position:absolute;left:1px;top:1px;bottom:1px;width:75%;background:var(--text);border-radius:1px;}
+
+    /* SCREENS */
+    .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.3s ease,transform 0.3s ease;transform:translateX(20px);}
+    .screen.active{opacity:1;pointer-events:all;transform:translateX(0);}
+    .screen-content{flex:1;overflow-y:auto;overflow-x:visible;padding-bottom:90px;}
+
+    /* SPLASH */
+    #splash{background:var(--bg);justify-content:center;align-items:center;gap:20px;}
+    .splash-logo{font-size:52px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,var(--primary),var(--primary2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:pulse-logo 1.5s ease-in-out infinite alternate;}
+    @keyframes pulse-logo{from{transform:scale(1);}to{transform:scale(1.04);}}
+    .splash-sub{font-size:13px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+    .splash-loader{width:160px;height:3px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:20px;}
+    .splash-loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;animation:load 2.2s ease forwards;}
+    @keyframes load{to{width:100%;}}
+
+    /* ONBOARDING */
+    .onb-slides{position:relative;flex:1;overflow:hidden;}
+    .onb-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:24px;text-align:center;opacity:0;transform:translateX(60px);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);pointer-events:none;}
+    .onb-slide.active{opacity:1;transform:translateX(0);pointer-events:all;}
+    .onb-slide.out{opacity:0;transform:translateX(-60px);}
+    .onb-icon-ring{width:140px;height:140px;position:relative;display:flex;align-items:center;justify-content:center;}
+    .onb-ring{position:absolute;border-radius:50%;border:2px solid;animation:ring-pulse 2s ease-in-out infinite;}
+    .onb-ring:nth-child(1){inset:0;border-color:rgba(108,99,255,0.4);animation-delay:0s;}
+    .onb-ring:nth-child(2){inset:16px;border-color:rgba(139,92,246,0.3);animation-delay:0.3s;}
+    .onb-ring:nth-child(3){inset:32px;border-color:rgba(6,214,160,0.2);animation-delay:0.6s;}
+    @keyframes ring-pulse{0%,100%{transform:scale(1);opacity:0.6;}50%{transform:scale(1.06);opacity:1;}}
+    .onb-emoji{font-size:44px;position:relative;z-index:2;}
+    .onb-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;}
+    .onb-desc{font-size:15px;color:var(--text2);line-height:1.6;}
+    .onb-dots{display:flex;gap:8px;justify-content:center;padding:20px;}
+    .onb-dot{width:8px;height:8px;border-radius:4px;background:var(--surface2);transition:all 0.3s;}
+    .onb-dot.active{width:24px;background:var(--primary);}
+    .onb-footer{padding:20px 32px 36px;display:flex;justify-content:space-between;align-items:center;}
+    .btn-skip{background:none;color:var(--text2);font-size:14px;padding:10px;}
+    .btn-next{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:14px 28px;border-radius:14px;font-size:15px;font-weight:700;box-shadow:0 4px 20px rgba(108,99,255,0.4);transition:transform 0.15s;}
+    .btn-next:active{transform:scale(0.97);}
+
+    /* AUTH */
+    #auth{background:var(--bg);justify-content:flex-end;}
+    .auth-bg{position:absolute;inset:0;overflow:hidden;}
+    .auth-gradient{position:absolute;top:-20%;left:-20%;width:140%;height:60%;background:radial-gradient(ellipse at 50% 40%,rgba(108,99,255,0.25),transparent 70%);}
+    .auth-sheet{position:relative;background:var(--bg2);border-radius:28px 28px 0 0;padding:32px 28px 48px;border-top:1px solid var(--border);}
+    .auth-tabs{display:flex;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:28px;}
+    .auth-tab{flex:1;padding:10px;border-radius:9px;background:none;color:var(--text2);font-size:14px;font-weight:600;transition:all 0.2s;}
+    .auth-tab.active{background:var(--surface2);color:var(--text);}
+    .auth-hero{text-align:center;margin-bottom:28px;}
+    .auth-hero h2{font-size:26px;font-weight:800;letter-spacing:-0.5px;}
+    .auth-hero p{font-size:14px;color:var(--text2);margin-top:6px;}
+    .field{margin-bottom:16px;}
+    .field label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;}
+    .field input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:15px;transition:border-color 0.2s;}
+    .field input:focus{border-color:var(--primary);}
+    .field input::placeholder{color:var(--text3);}
+    .btn-primary{width:100%;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:16px;border-radius:14px;font-size:16px;font-weight:700;margin-top:8px;box-shadow:0 4px 24px rgba(108,99,255,0.4);transition:transform 0.15s;}
+    .btn-primary:active{transform:scale(0.98);}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(8,8,16,0.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:none;padding:8px 8px 20px;z-index:100;}
+    .bottom-nav.visible{display:flex;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;background:none;color:var(--text3);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;transition:color 0.2s;position:relative;}
+    .nav-item svg{width:20px;height:20px;transition:transform 0.2s;}
+    .nav-item.active{color:var(--primary);}
+    .nav-item.active svg{transform:scale(1.1);}
+    .nav-badge{position:absolute;top:4px;right:calc(50% - 18px);width:16px;height:16px;background:var(--danger);border-radius:8px;font-size:9px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;}
+
+    /* PAGE HEADER */
+    .page-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);}
+    .page-title{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+    .icon-btn{width:40px;height:40px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;border:none;transition:background 0.2s;}
+    .icon-btn:active{background:var(--surface2);}
+    .icon-btn svg{width:18px;height:18px;}
+
+    /* MATCH TAB */
+    .type-toggle{display:flex;margin:12px 16px 0;background:var(--surface);border-radius:12px;padding:4px;}
+    .type-btn{flex:1;padding:9px;border-radius:9px;background:none;color:var(--text2);font-size:13px;font-weight:600;transition:all 0.2s;}
+    .type-btn.active{background:var(--primary);color:white;}
+    .sport-filters{padding:0 16px 12px;display:flex;gap:8px;overflow-x:scroll;scrollbar-width:none;margin-top:12px;touch-action:pan-x !important;-webkit-overflow-scrolling:touch;cursor:grab;}
+    .sport-filters::-webkit-scrollbar{display:none;}
+    .sport-pill{flex-shrink:0;padding:8px 16px;border-radius:20px;background:var(--surface);color:var(--text2);font-size:13px;font-weight:600;border:1.5px solid transparent;transition:all 0.2s;cursor:pointer;}
+    .sport-pill.active{background:rgba(108,99,255,0.15);color:var(--primary);border-color:rgba(108,99,255,0.3);}
+
+    /* CARD STACK */
+    .card-stack{position:relative;height:calc(100dvh - 290px);margin:8px 16px 0;display:flex;align-items:center;justify-content:center;}
+    .swipe-card{position:absolute;width:100%;background:var(--surface);border-radius:24px;overflow:hidden;user-select:none;box-shadow:0 16px 48px rgba(0,0,0,0.5);transition:transform 0.08s ease;border:1px solid var(--border);touch-action:none;}
+    .swipe-card:nth-child(1){z-index:3;}
+    .swipe-card:nth-child(2){transform:scale(0.95) translateY(14px);z-index:1;filter:brightness(0.65);}
+    .swipe-card:nth-child(3){transform:scale(0.90) translateY(28px);z-index:0;filter:brightness(0.45);}
+    .card-badge{position:absolute;top:20px;padding:8px 16px;border-radius:10px;font-size:18px;font-weight:900;letter-spacing:2px;opacity:0;pointer-events:none;z-index:10;border:3px solid;}
+    .card-badge.like{left:20px;color:var(--accent);border-color:var(--accent);transform:rotate(-12deg);}
+    .card-badge.nope{right:20px;color:var(--danger);border-color:var(--danger);transform:rotate(12deg);}
+
+    /* PLAYER CARD */
+    .player-card-bg{height:190px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .player-avatar{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:white;box-shadow:0 8px 32px rgba(0,0,0,0.3);background:rgba(0,0,0,0.25);}
+    .player-rank-badge{position:absolute;bottom:12px;right:16px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;backdrop-filter:blur(10px);}
+    .rank-gold{background:rgba(255,215,0,0.2);color:var(--gold);border:1px solid rgba(255,215,0,0.3);}
+    .rank-silver{background:rgba(192,192,208,0.2);color:var(--silver);border:1px solid rgba(192,192,208,0.3);}
+    .rank-bronze{background:rgba(205,127,50,0.2);color:var(--bronze);border:1px solid rgba(205,127,50,0.3);}
+    .player-card-info{padding:14px 18px 18px;}
+    .player-name-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .player-name{font-size:21px;font-weight:800;}
+    .verify-badge{color:var(--primary);font-size:16px;}
+    .sport-score-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(108,99,255,0.15);color:var(--primary);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-left:auto;}
+    .player-meta{display:flex;gap:12px;font-size:13px;color:var(--text2);margin-bottom:10px;}
+    .vibe-tag{padding:4px 10px;border-radius:20px;background:var(--surface2);font-size:11px;font-weight:600;color:var(--text2);}
+
+    /* PARTIDA CARD */
+    .partida-header{padding:18px 18px 12px;display:flex;align-items:center;gap:14px;}
+    .partida-sport-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(108,99,255,0.15);}
+    .partida-title{font-size:20px;font-weight:800;}
+    .partida-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+    .partida-detail{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:0 18px;margin-bottom:8px;}
+    .partida-detail strong{color:var(--text);}
+    .partida-players{padding:14px 18px;border-top:1px solid var(--border);margin-top:4px;}
+    .partida-players-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+    .players-row{display:flex;}
+    .mini-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;border:2px solid var(--surface);margin-left:-5px;}
+    .mini-avatar:first-child{margin-left:0;}
+    .vagas-badge{margin-left:10px;padding:3px 10px;border-radius:20px;background:rgba(6,214,160,0.15);color:var(--accent);font-size:12px;font-weight:700;border:1px solid rgba(6,214,160,0.3);}
+
+    /* ACTION BUTTONS */
+    .card-actions{display:flex;justify-content:center;align-items:center;gap:18px;padding:10px 0 4px;}
+    .action-btn{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:none;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+    .action-btn:active{transform:scale(0.88);}
+    .action-nope{background:rgba(255,77,109,0.12);color:var(--danger);border:1.5px solid rgba(255,77,109,0.25);}
+    .action-like{background:rgba(6,214,160,0.12);color:var(--accent);border:1.5px solid rgba(6,214,160,0.25);width:70px;height:70px;font-size:26px;}
+    .action-super{background:rgba(255,183,3,0.12);color:var(--warn);border:1.5px solid rgba(255,183,3,0.25);}
+
+    /* QUADRAS */
+    .search-bar{margin:0 16px 14px;background:var(--surface);border-radius:14px;display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--border);}
+    .search-bar input{flex:1;background:none;color:var(--text);font-size:14px;}
+    .search-bar input::placeholder{color:var(--text3);}
+    .quadra-card{margin:0 16px 14px;background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid var(--border);transition:transform 0.15s;}
+    .quadra-card:active{transform:scale(0.99);}
+    .quadra-photo{height:130px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
+    .quadra-sports-overlay{position:absolute;top:10px;left:10px;display:flex;gap:6px;}
+    .quadra-sport-tag{padding:3px 9px;border-radius:20px;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);color:white;font-size:11px;font-weight:600;}
+    .quadra-price-tag{position:absolute;bottom:10px;right:10px;padding:5px 11px;border-radius:20px;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);color:var(--accent);font-size:13px;font-weight:700;}
+    .quadra-info{padding:12px 16px;}
+    .quadra-name{font-size:16px;font-weight:700;margin-bottom:5px;}
+    .quadra-meta{display:flex;gap:12px;font-size:13px;color:var(--text2);}
+    .quadra-rating{color:var(--warn);font-weight:600;}
+    .btn-reservar{margin:10px 16px 14px;display:block;width:calc(100% - 32px);background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:12px;border-radius:12px;font-size:14px;font-weight:700;text-align:center;}
+
+    /* AGENDA */
+    .agenda-section{padding:16px 16px 8px;}
+    .section-title{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+    .agenda-card{background:var(--surface);border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid var(--border);}
+    .agenda-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+    .agenda-sport{font-size:20px;margin-right:8px;}
+    .agenda-title{font-size:15px;font-weight:700;}
+    .agenda-subtitle{font-size:12px;color:var(--text2);margin-top:2px;}
+    .status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+    .status-confirmed{background:rgba(6,214,160,0.15);color:var(--accent);border:1px solid rgba(6,214,160,0.3);}
+    .status-urgent{background:rgba(255,183,3,0.15);color:var(--warn);border:1px solid rgba(255,183,3,0.3);}
+    .status-pending{background:rgba(108,99,255,0.15);color:var(--primary);border:1px solid rgba(108,99,255,0.3);}
+    .agenda-details{display:flex;gap:14px;font-size:13px;color:var(--text2);margin-bottom:10px;}
+    .btn-confirm{width:100%;padding:11px;border-radius:10px;background:rgba(6,214,160,0.12);color:var(--accent);font-size:14px;font-weight:700;border:1.5px solid rgba(6,214,160,0.25);}
+    .btn-vibe{width:100%;padding:11px;border-radius:10px;background:rgba(108,99,255,0.12);color:var(--primary);font-size:14px;font-weight:700;border:1.5px solid rgba(108,99,255,0.25);}
+
+    /* PROFILE */
+    .profile-header{padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;}
+    .profile-avatar{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:white;box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--primary);}
+    .profile-name{font-size:22px;font-weight:800;display:flex;align-items:center;gap:6px;}
+    .score-card{margin:0 16px 14px;background:var(--surface);border-radius:20px;padding:18px;border:1px solid var(--border);}
+    .score-ring-container{display:flex;align-items:center;gap:24px;}
+    .score-ring{position:relative;width:88px;height:88px;flex-shrink:0;}
+    .score-ring svg{transform:rotate(-90deg);}
+    .score-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .score-number{font-size:24px;font-weight:900;color:var(--primary);}
+    .score-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;}
+    .score-stats{display:flex;gap:20px;}
+    .stat-item{display:flex;flex-direction:column;gap:2px;}
+    .stat-value{font-size:20px;font-weight:800;}
+    .stat-label{font-size:11px;color:var(--text2);}
+    .ranking-card{margin:0 16px 14px;background:var(--surface);border-radius:20px;padding:16px;border:1px solid var(--border);}
+    .ranking-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    .ranking-item:last-child{border-bottom:none;padding-bottom:0;}
+    .ranking-pos{width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--text3);}
+    .ranking-mini-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;}
+    .ranking-name{font-size:14px;font-weight:600;flex:1;}
+    .ranking-score{font-size:13px;font-weight:700;color:var(--primary);}
+    .ranking-you{background:rgba(108,99,255,0.08);border-radius:10px;padding:9px 10px;margin:0 -4px;}
+    .vibes-card{margin:0 16px 14px;background:var(--surface);border-radius:20px;padding:16px;border:1px solid var(--border);}
+    .vibes-card h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+    .vibes-grid{display:flex;flex-wrap:wrap;gap:8px;}
+    .vibe-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+    .vibe-pos{background:rgba(6,214,160,0.12);color:var(--accent);border:1px solid rgba(6,214,160,0.25);}
+    .pro-banner{margin:0 16px 14px;border-radius:20px;padding:18px;background:linear-gradient(135deg,rgba(108,99,255,0.25),rgba(139,92,246,0.15));border:1px solid rgba(108,99,255,0.3);display:flex;align-items:center;justify-content:space-between;}
+    .pro-banner-text h3{font-size:15px;font-weight:800;}
+    .pro-banner-text p{font-size:12px;color:var(--text2);margin-top:3px;}
+    .btn-pro{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;box-shadow:0 4px 16px rgba(108,99,255,0.35);}
+    .menu-list{margin:0 16px 20px;background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid var(--border);}
+    .menu-item{display:flex;align-items:center;gap:14px;padding:15px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;background:none;width:100%;text-align:left;}
+    .menu-item:last-child{border-bottom:none;}
+    .menu-item:active{background:var(--surface2);}
+    .menu-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+    .menu-item-label{font-size:15px;font-weight:600;flex:1;}
+    .menu-chevron{color:var(--text3);font-size:18px;}
+
+    /* MODALS */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+    .modal-overlay.visible{opacity:1;pointer-events:all;}
+    .modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:28px 28px 0 0;padding:16px 24px 40px;border-top:1px solid var(--border);transform:translateY(40px);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);position:relative;}
+    .modal-close-x{position:absolute;top:12px;right:14px;width:34px;height:34px;background:var(--surface);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;font-weight:600;border:none;cursor:pointer;z-index:5;transition:background 0.15s;}
+    .modal-close-x:hover,.modal-close-x:active{background:var(--surface2);color:var(--text);}
+    .modal-overlay.visible .modal-sheet{transform:translateY(0);}
+    .modal-handle{width:40px;height:4px;background:var(--surface2);border-radius:2px;margin:0 auto 20px;}
+    .modal-title{font-size:20px;font-weight:800;margin-bottom:4px;}
+    .modal-sub{font-size:14px;color:var(--text2);margin-bottom:20px;}
+    .time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+    .time-slot{padding:12px 8px;border-radius:12px;background:var(--surface);color:var(--text);font-size:13px;font-weight:600;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.2s;}
+    .time-slot.selected{background:rgba(108,99,255,0.15);border-color:var(--primary);color:var(--primary);}
+    .time-slot.taken{opacity:0.3;cursor:not-allowed;}
+    .booking-summary{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+    .vibe-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+    .vibe-option{padding:10px 14px;border-radius:20px;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .vibe-option.sel-pos{background:rgba(6,214,160,0.15);border-color:var(--accent);color:var(--accent);}
+    .vibe-option.sel-neg{background:rgba(255,77,109,0.15);border-color:var(--danger);color:var(--danger);}
+    .sport-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .sport-option{padding:12px 8px;border-radius:12px;background:var(--surface);border:1.5px solid var(--border);text-align:center;cursor:pointer;transition:all 0.2s;}
+    .sport-option .s-icon{font-size:22px;display:block;margin-bottom:4px;}
+    .sport-option .s-label{font-size:11px;color:var(--text2);font-weight:600;}
+    .sport-option.selected{background:rgba(108,99,255,0.15);border-color:var(--primary);}
+    .sport-option.selected .s-label{color:var(--primary);}
+    .modal-field{margin-bottom:14px;}
+    .modal-field label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;}
+    .modal-select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-size:14px;font-family:inherit;appearance:none;cursor:pointer;}
+
+    /* MATCH MODAL */
+    .match-confetti{font-size:30px;margin-bottom:8px;text-align:center;}
+    .match-title{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;}
+    .match-avatars{display:flex;justify-content:center;gap:14px;margin:18px 0;align-items:center;}
+    .match-avatar{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:white;border:3px solid var(--primary);}
+    .btn-msg{width:100%;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:15px;border-radius:14px;font-size:16px;font-weight:700;margin-bottom:10px;}
+    .btn-continue{width:100%;background:var(--surface);color:var(--text2);padding:14px;border-radius:14px;font-size:15px;font-weight:600;}
+
+    /* RANKING TABS */
+    #rank-tabs{touch-action:pan-x !important;-webkit-overflow-scrolling:touch;overflow-x:scroll !important;cursor:grab;}
+    #rank-tabs::-webkit-scrollbar{display:none;}
+    .rank-sport-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;border:1.5px solid transparent;cursor:pointer;transition:all 0.2s;font-family:inherit;}
+    .rank-sport-tab.active{background:rgba(108,99,255,0.15);color:var(--primary);border-color:rgba(108,99,255,0.3);}
+
+    /* MENSAGENS TAB */
+    .conv-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+    .conv-item:active{background:var(--surface);}
+    .conv-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;flex-shrink:0;position:relative;}
+    .conv-av-group{font-size:22px;background:rgba(108,99,255,0.2);}
+    .conv-online{position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+    .conv-info{flex:1;min-width:0;}
+    .conv-name{font-size:15px;font-weight:700;margin-bottom:3px;}
+    .conv-last{font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+    .conv-time{font-size:11px;color:var(--text3);}
+    .conv-unread{min-width:18px;height:18px;border-radius:9px;background:var(--primary);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+    .msg-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center;gap:12px;}
+    .msg-empty-icon{font-size:52px;opacity:0.4;}
+    .msg-empty-text{font-size:16px;font-weight:600;color:var(--text2);}
+    .msg-empty-sub{font-size:14px;color:var(--text3);line-height:1.5;}
+
+    /* CHAT MODAL */
+    .chat-header{display:flex;align-items:center;gap:12px;padding:0 0 16px;border-bottom:1px solid var(--border);margin-bottom:0;}
+    .chat-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;flex-shrink:0;}
+    .chat-messages{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:10px;max-height:50vh;min-height:200px;}
+    .chat-msg{display:flex;flex-direction:column;}
+    .chat-me{align-items:flex-end;}
+    .chat-them{align-items:flex-start;}
+    .chat-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;max-width:80%;}
+    .chat-me .chat-bubble{background:var(--primary);color:white;border-bottom-right-radius:4px;}
+    .chat-them .chat-bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px;}
+    .chat-time{font-size:10px;color:var(--text3);margin-top:3px;padding:0 4px;}
+    .chat-date-divider{text-align:center;font-size:11px;color:var(--text3);margin:4px 0;}
+    .chat-input-row{display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--border);margin-top:8px;}
+    .chat-input-row input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:24px;padding:11px 16px;color:var(--text);font-size:14px;font-family:inherit;}
+    .chat-send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:white;font-size:18px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+    /* PLAYER PROFILE MODAL */
+    .pp-bg{height:160px;display:flex;align-items:center;justify-content:center;border-radius:16px;margin-bottom:16px;position:relative;}
+    .pp-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:white;}
+    .pp-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+    .stag{background:var(--surface2);padding:4px 10px;border-radius:20px;font-size:12px;color:var(--text2);font-weight:600;}
+    .vtag{background:rgba(108,99,255,0.12);padding:4px 10px;border-radius:20px;font-size:12px;color:var(--primary);font-weight:600;border:1px solid rgba(108,99,255,0.2);}
+
+    /* AGENDA EXPAND */
+    .agenda-expand{display:none;padding-top:12px;border-top:1px solid var(--border);margin-top:12px;}
+    .agenda-expand.open{display:block;}
+    .agenda-players-full{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+    .agenda-player-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);padding:5px 10px;border-radius:20px;}
+    .agenda-player-chip span{font-size:12px;color:var(--text2);}
+    .btn-chat-partida{width:100%;padding:11px;border-radius:10px;background:rgba(108,99,255,0.12);color:var(--primary);font-size:14px;font-weight:700;border:1.5px solid rgba(108,99,255,0.25);margin-bottom:8px;}
+
+    /* EDIT PROFILE */
+    .edit-sport-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+    .edit-sport-chip{padding:7px 14px;border-radius:20px;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .edit-sport-chip.sel{background:rgba(108,99,255,0.15);border-color:var(--primary);color:var(--primary);}
+
+    /* NOTIFICATIONS */
+    .notif-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+    .notif-item:last-child{border-bottom:none;}
+    .notif-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .notif-body{flex:1;}
+    .notif-title{font-size:14px;font-weight:600;margin-bottom:2px;}
+    .notif-sub{font-size:12px;color:var(--text2);}
+    .notif-time{font-size:11px;color:var(--text3);margin-top:3px;}
+    .notif-unread{background:var(--primary);width:8px;height:8px;border-radius:50%;align-self:center;flex-shrink:0;}
+
+    /* PRIVACY TOGGLES */
+    .privacy-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+    .privacy-item:last-child{border-bottom:none;}
+    .privacy-label{font-size:15px;font-weight:600;}
+    .privacy-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+    .toggle-wrap{position:relative;width:48px;height:26px;flex-shrink:0;}
+    .toggle-wrap input{opacity:0;width:0;height:0;position:absolute;}
+    .toggle-slider{position:absolute;inset:0;background:var(--surface2);border-radius:13px;cursor:pointer;transition:0.3s;}
+    .toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:0.3s;}
+    .toggle-wrap input:checked+.toggle-slider{background:var(--primary);}
+    .toggle-wrap input:checked+.toggle-slider:before{transform:translateX(22px);background:white;}
+
+    /* TOAST */
+    #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface2);color:var(--text);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:300;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);border:1px solid var(--border);white-space:nowrap;max-width:90vw;}
+    #toast.show{transform:translateX(-50%) translateY(0);}
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SPLASH -->
+  <div class="screen active" id="splash" style="justify-content:center;align-items:center;gap:20px;">
+    <div class="splash-logo">SportVibe</div>
+    <div class="splash-sub">Sua tribo esportiva te espera</div>
+    <div class="splash-loader"><div class="splash-loader-fill"></div></div>
+  </div>
+
+  <!-- ONBOARDING -->
+  <div class="screen" id="onboarding" style="background:var(--bg)">
+    <div class="onb-slides">
+      <div class="onb-slide active">
+        <div class="onb-icon-ring"><div class="onb-ring"></div><div class="onb-ring"></div><div class="onb-ring"></div><span class="onb-emoji">🎯</span></div>
+        <h2 class="onb-title">Match Esportivo</h2>
+        <p class="onb-desc">Encontre jogadores do seu nível, perto de você, prontos para jogar agora.</p>
+      </div>
+      <div class="onb-slide">
+        <div class="onb-icon-ring"><div class="onb-ring"></div><div class="onb-ring"></div><div class="onb-ring"></div><span class="onb-emoji">🏆</span></div>
+        <h2 class="onb-title">SportScore™</h2>
+        <p class="onb-desc">Sua reputação importa. Construa seu índice e suba no ranking de Blumenau.</p>
+      </div>
+      <div class="onb-slide">
+        <div class="onb-icon-ring"><div class="onb-ring"></div><div class="onb-ring"></div><div class="onb-ring"></div><span class="onb-emoji">⚡</span></div>
+        <h2 class="onb-title">Reserve & Jogue</h2>
+        <p class="onb-desc">Ache a partida, reserve a quadra e pague via PIX — tudo em um lugar.</p>
+      </div>
+    </div>
+    <div class="onb-dots"><div class="onb-dot active"></div><div class="onb-dot"></div><div class="onb-dot"></div></div>
+    <div class="onb-footer">
+      <button class="btn-skip" onclick="goToAuth()">Pular</button>
+      <button class="btn-next" id="onb-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="screen" id="auth" style="justify-content:flex-end;">
+    <div class="auth-bg">
+      <div class="auth-gradient"></div>
+      <div style="display:flex;align-items:center;justify-content:center;height:260px;font-size:72px;">⚡</div>
+    </div>
+    <div class="auth-sheet">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="authTab('login',this)">Entrar</button>
+        <button class="auth-tab" onclick="authTab('register',this)">Criar conta</button>
+      </div>
+      <div id="login-form">
+        <div class="auth-hero"><h2>Bem-vindo de volta</h2><p>Continue construindo seu legado</p></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com"/></div>
+        <div class="field"><label>Senha</label><input type="password" placeholder="••••••••"/></div>
+        <button class="btn-primary" onclick="enterApp()">Entrar</button>
+      </div>
+      <div id="register-form" style="display:none">
+        <div class="auth-hero"><h2>Crie sua conta</h2><p>Comece a jogar em Blumenau</p></div>
+        <div class="field"><label>Nome</label><input type="text" placeholder="Seu nome"/></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com"/></div>
+        <div class="field"><label>Senha</label><input type="password" placeholder="••••••••"/></div>
+        <button class="btn-primary" onclick="enterApp()">Criar conta grátis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATCH TAB -->
+  <div class="screen" id="match-tab">
+    <div class="status-bar"><span id="clk">09:41</span><div style="display:flex;gap:6px;align-items:center;"><svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+    <div class="page-header">
+      <div><div class="page-title">Match</div><div style="font-size:12px;color:var(--text2)">📍 Blumenau, SC</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="icon-btn" onclick="showModal('create-partida-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="icon-btn" onclick="showToast('🔧 Filtros em breve!')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg></button>
+      </div>
+    </div>
+    <div class="screen-content" style="overflow:hidden;padding-bottom:0;touch-action:none;">
+      <div class="type-toggle">
+        <button class="type-btn active" onclick="setType('all',this)">Todos</button>
+        <button class="type-btn" onclick="setType('players',this)">Jogadores</button>
+        <button class="type-btn" onclick="setType('partidas',this)">Partidas</button>
+      </div>
+      <div class="sport-filters" id="match-sport-filters">
+        <div class="sport-pill active" data-sport="todos" onclick="filterSport(this)">Todos</div>
+        <div class="sport-pill" data-sport="futsal" onclick="filterSport(this)">⚽ Futsal</div>
+        <div class="sport-pill" data-sport="society" onclick="filterSport(this)">⚽ F. Society</div>
+        <div class="sport-pill" data-sport="campo" onclick="filterSport(this)">⚽ F. Campo</div>
+        <div class="sport-pill" data-sport="padel" onclick="filterSport(this)">🎾 Padel</div>
+        <div class="sport-pill" data-sport="tenis" onclick="filterSport(this)">🎾 Tênis</div>
+        <div class="sport-pill" data-sport="beachtennis" onclick="filterSport(this)">🎾 Beach Tennis</div>
+        <div class="sport-pill" data-sport="volei" onclick="filterSport(this)">🏐 Vôlei</div>
+        <div class="sport-pill" data-sport="areia" onclick="filterSport(this)">🏖️ Vôlei de Areia</div>
+        <div class="sport-pill" data-sport="futevolei" onclick="filterSport(this)">🏐 Futevolei</div>
+        <div class="sport-pill" data-sport="basquete" onclick="filterSport(this)">🏀 Basquete</div>
+        <div class="sport-pill" data-sport="squash" onclick="filterSport(this)">🎾 Squash</div>
+        <div class="sport-pill" data-sport="pingpong" onclick="filterSport(this)">🏓 Ping Pong</div>
+      </div>
+      <div class="card-stack" id="card-stack"></div>
+      <div class="card-actions">
+        <button class="action-btn action-nope" onclick="swipeCard('left')">✕</button>
+        <button class="action-btn action-super" onclick="superLike()">⭐</button>
+        <button class="action-btn action-like" onclick="swipeCard('right')">♥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUADRAS TAB -->
+  <div class="screen" id="quadras-tab">
+    <div class="status-bar"><span>09:41</span><div style="display:flex;gap:6px;align-items:center;"><svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+    <div class="page-header"><div class="page-title">Quadras</div></div>
+    <div class="screen-content">
+      <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar quadras em Blumenau..."/></div>
+      <div class="sport-filters" style="margin-top:0" id="quadras-filters">
+        <div class="sport-pill active" onclick="filterQuadras('todos',this)">Todos</div>
+        <div class="sport-pill" onclick="filterQuadras('futsal',this)">⚽ Futsal</div>
+        <div class="sport-pill" onclick="filterQuadras('f.society',this)">⚽ F. Society</div>
+        <div class="sport-pill" onclick="filterQuadras('f.campo',this)">⚽ F. Campo</div>
+        <div class="sport-pill" onclick="filterQuadras('padel',this)">🎾 Padel</div>
+        <div class="sport-pill" onclick="filterQuadras('tênis',this)">🎾 Tênis</div>
+        <div class="sport-pill" onclick="filterQuadras('beach tennis',this)">🎾 Beach Tennis</div>
+        <div class="sport-pill" onclick="filterQuadras('vôlei',this)">🏐 Vôlei</div>
+        <div class="sport-pill" onclick="filterQuadras('vôlei de areia',this)">🏖️ Vôlei de Areia</div>
+        <div class="sport-pill" onclick="filterQuadras('futevolei',this)">🏐 Futevolei</div>
+        <div class="sport-pill" onclick="filterQuadras('basquete',this)">🏀 Basquete</div>
+        <div class="sport-pill" onclick="filterQuadras('squash',this)">🎾 Squash</div>
+        <div class="sport-pill" onclick="filterQuadras('ping pong',this)">🏓 Ping Pong</div>
+      </div>
+      <div class="quadra-card" data-sports="futsal,volei,f.society,f.campo">
+        <div class="quadra-photo" style="background:linear-gradient(135deg,#12122a,#1e1e4a)">🏟️<div class="quadra-sports-overlay"><span class="quadra-sport-tag">⚽ Futsal</span><span class="quadra-sport-tag">🏐 Vôlei</span></div><div class="quadra-price-tag">R$80/h</div></div>
+        <div class="quadra-info"><div class="quadra-name">Arena Champions</div><div class="quadra-meta"><span>📍 1.2 km</span><span class="quadra-rating">⭐ 4.9</span><span>23 avaliações</span></div></div>
+        <button class="btn-reservar" onclick="openBooking('Arena Champions','R$ 80,00')">Ver horários disponíveis</button>
+      </div>
+      <div class="quadra-card" data-sports="padel,tênis,beach tennis,squash">
+        <div class="quadra-photo" style="background:linear-gradient(135deg,#0d1f0d,#1a3d1a)">🎾<div class="quadra-sports-overlay"><span class="quadra-sport-tag">🎾 Padel</span><span class="quadra-sport-tag">🎾 Tênis</span></div><div class="quadra-price-tag">R$120/h</div></div>
+        <div class="quadra-info"><div class="quadra-name">Padel Center BNU</div><div class="quadra-meta"><span>📍 2.4 km</span><span class="quadra-rating">⭐ 4.8</span><span>41 avaliações</span></div></div>
+        <button class="btn-reservar" onclick="openBooking('Padel Center BNU','R$ 120,00')">Ver horários disponíveis</button>
+      </div>
+      <div class="quadra-card" data-sports="basquete,ping pong">
+        <div class="quadra-photo" style="background:linear-gradient(135deg,#1f0d0d,#3d1a1a)">🏀<div class="quadra-sports-overlay"><span class="quadra-sport-tag">🏀 Basquete</span><span class="quadra-sport-tag">🏓 Ping Pong</span></div><div class="quadra-price-tag">R$60/h</div></div>
+        <div class="quadra-info"><div class="quadra-name">Sport Club Blumenau</div><div class="quadra-meta"><span>📍 3.1 km</span><span class="quadra-rating">⭐ 4.7</span><span>18 avaliações</span></div></div>
+        <button class="btn-reservar" onclick="openBooking('Sport Club Blumenau','R$ 60,00')">Ver horários disponíveis</button>
+      </div>
+      <div class="quadra-card" data-sports="vôlei de areia,futevolei,beach tennis,vôlei">
+        <div class="quadra-photo" style="background:linear-gradient(135deg,#1a1000,#3d2b00)">🏖️<div class="quadra-sports-overlay"><span class="quadra-sport-tag">🏖️ V. de Areia</span><span class="quadra-sport-tag">🎾 Beach Tennis</span></div><div class="quadra-price-tag">R$90/h</div></div>
+        <div class="quadra-info"><div class="quadra-name">Beach Arena BNU</div><div class="quadra-meta"><span>📍 4.8 km</span><span class="quadra-rating">⭐ 4.6</span><span>9 avaliações</span></div></div>
+        <button class="btn-reservar" onclick="openBooking('Beach Arena BNU','R$ 90,00')">Ver horários disponíveis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA TAB -->
+  <div class="screen" id="agenda-tab">
+    <div class="status-bar"><span>09:41</span><div style="display:flex;gap:6px;align-items:center;"><svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+    <div class="page-header"><div class="page-title">Agenda</div></div>
+    <div class="screen-content">
+      <div class="agenda-section">
+        <div class="section-title">Hoje</div>
+        <div class="agenda-card" onclick="toggleAgenda(this)">
+          <div class="agenda-card-header"><div><span class="agenda-sport">⚽</span><span class="agenda-title">Futsal Society</span><div class="agenda-subtitle">Arena Champions · R. XV de Novembro</div></div><span class="status-badge status-urgent">⏰ Confirme</span></div>
+          <div class="agenda-details"><span>📅 Hoje, 19h00</span><span>⚡ Score mín: 60</span></div>
+          <div style="display:flex;align-items:center;margin-bottom:12px;">
+            <div class="players-row"><div class="mini-avatar" style="background:#6C63FF">M</div><div class="mini-avatar" style="background:#06D6A0">R</div><div class="mini-avatar" style="background:#FFB703">C</div><div class="mini-avatar" style="background:#FF4D6D">A</div><div class="mini-avatar" style="background:#8B5CF6">L</div></div>
+            <span class="vagas-badge" style="margin-left:10px">+7 vagas</span>
+          </div>
+          <button class="btn-confirm" onclick="event.stopPropagation();showToast('✅ Presença confirmada!')">✓ Confirmar presença</button>
+          <div class="agenda-expand">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Jogadores confirmados</div>
+            <div class="agenda-players-full">
+              <div class="agenda-player-chip" onclick="event.stopPropagation();showToast('👤 Esse é você!')" style="cursor:pointer"><div class="mini-avatar user-avatar" style="background:#6C63FF;margin-left:0">M</div><span>Mateus (Você)</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Rafael S.')" style="cursor:pointer"><div class="mini-avatar" style="background:#06D6A0;margin-left:0">R</div><span>Rafael S.</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Carlos F.')" style="cursor:pointer"><div class="mini-avatar" style="background:#FFB703;margin-left:0">C</div><span>Carlos F.</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Ana C.')" style="cursor:pointer"><div class="mini-avatar" style="background:#FF4D6D;margin-left:0">A</div><span>Ana C.</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Lucas M.')" style="cursor:pointer"><div class="mini-avatar" style="background:#8B5CF6;margin-left:0">L</div><span>Lucas M.</span></div>
+            </div>
+            <button class="btn-chat-partida" onclick="event.stopPropagation();openGroupChat('Futsal Society','⚽')">💬 Chat da Partida</button>
+          </div>
+        </div>
+        <div class="agenda-card" onclick="toggleAgenda(this)">
+          <div class="agenda-card-header"><div><span class="agenda-sport">🎾</span><span class="agenda-title">Padel Dupla</span><div class="agenda-subtitle">Padel Center BNU</div></div><span class="status-badge status-confirmed">✅ Confirmado</span></div>
+          <div class="agenda-details"><span>📅 Hoje, 21h00</span><span>📍 R. Hermann Hering</span></div>
+          <div style="display:flex;align-items:center;margin-bottom:4px;"><div class="players-row"><div class="mini-avatar" style="background:#6C63FF">M</div><div class="mini-avatar" style="background:#06D6A0">J</div><div class="mini-avatar" style="background:#FFB703">K</div><div class="mini-avatar" style="background:#FF4D6D">F</div></div></div>
+          <div class="agenda-expand">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Jogadores</div>
+            <div class="agenda-players-full">
+              <div class="agenda-player-chip" onclick="event.stopPropagation();showToast('👤 Esse é você!')" style="cursor:pointer"><div class="mini-avatar user-avatar" style="background:#6C63FF;margin-left:0">M</div><span>Mateus (Você)</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Juliana K.')" style="cursor:pointer"><div class="mini-avatar" style="background:#06D6A0;margin-left:0">J</div><span>Juliana K.</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Kaique S.')" style="cursor:pointer"><div class="mini-avatar" style="background:#FFB703;margin-left:0">K</div><span>Kaique S.</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Fernanda S.')" style="cursor:pointer"><div class="mini-avatar" style="background:#FF4D6D;margin-left:0">F</div><span>Fernanda S.</span></div>
+            </div>
+            <button class="btn-chat-partida" onclick="event.stopPropagation();openGroupChat('Padel Dupla','🎾')">💬 Chat da Partida</button>
+          </div>
+        </div>
+      </div>
+      <div class="agenda-section">
+        <div class="section-title">Esta semana</div>
+        <div class="agenda-card" onclick="toggleAgenda(this)">
+          <div class="agenda-card-header"><div><span class="agenda-sport">🏀</span><span class="agenda-title">Basquete 5x5</span><div class="agenda-subtitle">Sport Club Blumenau</div></div><span class="status-badge status-pending">🔵 Pendente</span></div>
+          <div class="agenda-details"><span>📅 Sáb, 10h00</span><span>📍 R. Osvaldo Cruz</span></div>
+          <div style="display:flex;align-items:center;margin-bottom:12px;"><div class="players-row"><div class="mini-avatar" style="background:#6C63FF">M</div><div class="mini-avatar" style="background:#8B5CF6">P</div></div><span class="vagas-badge" style="margin-left:10px">+8 vagas</span></div>
+          <button class="btn-vibe" onclick="event.stopPropagation();showModal('vibecheck-modal')">🏆 Fazer Vibe Check</button>
+          <div class="agenda-expand">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Confirmados até agora</div>
+            <div class="agenda-players-full">
+              <div class="agenda-player-chip" onclick="event.stopPropagation();showToast('👤 Esse é você!')" style="cursor:pointer"><div class="mini-avatar user-avatar" style="background:#6C63FF;margin-left:0">M</div><span>Mateus (Você)</span></div>
+              <div class="agenda-player-chip" onclick="event.stopPropagation();openPlayerByName('Pedro A.')" style="cursor:pointer"><div class="mini-avatar" style="background:#8B5CF6;margin-left:0">P</div><span>Pedro A.</span></div>
+            </div>
+            <button class="btn-chat-partida" onclick="event.stopPropagation();openGroupChat('Basquete 5x5','🏀')">💬 Chat da Partida</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div class="screen" id="profile-tab">
+    <div class="status-bar"><span>09:41</span><div style="display:flex;gap:6px;align-items:center;"><svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+    <div class="screen-content">
+      <div class="profile-header">
+        <div class="profile-avatar user-avatar" style="background:linear-gradient(135deg,#6C63FF,#8B5CF6);background-size:cover;background-position:center">M</div>
+        <div>
+          <div class="profile-name">Mateus <span style="color:var(--primary)">✓</span></div>
+          <div style="margin-top:6px"><span style="padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.3)">🥇 Ouro</span></div>
+        </div>
+        <div style="font-size:14px;color:var(--text2)">⚽ Futsal · 🎾 Padel · 🏓 Ping Pong</div>
+      </div>
+
+      <div class="score-card">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">SportScore™</div>
+        <div class="score-ring-container">
+          <div class="score-ring">
+            <svg width="88" height="88" viewBox="0 0 88 88">
+              <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+              <circle cx="44" cy="44" r="36" fill="none" stroke="url(#sg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+              <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6C63FF"/><stop offset="100%" stop-color="#06D6A0"/></linearGradient></defs>
+            </svg>
+            <div class="score-ring-text"><span class="score-number">85</span><span class="score-label">Score</span></div>
+          </div>
+          <div class="score-stats">
+            <div class="stat-item"><span class="stat-value">47</span><span class="stat-label">Jogos</span></div>
+            <div class="stat-item"><span class="stat-value" style="color:var(--accent)">96%</span><span class="stat-label">Presença</span></div>
+            <div class="stat-item"><span class="stat-value">32</span><span class="stat-label">Matches</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ranking-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:12px">🏆 Ranking Blumenau</div>
+        <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:12px;margin-bottom:4px;" id="rank-tabs">
+          <button class="rank-sport-tab active" onclick="setRankTab(this,'geral')">Geral</button>
+          <button class="rank-sport-tab" onclick="setRankTab(this,'futsal')">⚽ Futsal</button>
+          <button class="rank-sport-tab" onclick="setRankTab(this,'padel')">🎾 Padel</button>
+          <button class="rank-sport-tab" onclick="setRankTab(this,'volei')">🏐 Vôlei</button>
+          <button class="rank-sport-tab" onclick="setRankTab(this,'beach')">🏖️ Beach</button>
+          <button class="rank-sport-tab" onclick="setRankTab(this,'basquete')">🏀 Basquete</button>
+        </div>
+        <div id="rank-list"></div>
+      </div>
+
+      <div class="vibes-card">
+        <h3>Vibe Check 360°</h3>
+        <div class="vibes-grid">
+          <span class="vibe-chip vibe-pos">🤝 Bom de Grupo</span>
+          <span class="vibe-chip vibe-pos">⚡ Fair Play</span>
+          <span class="vibe-chip vibe-pos">⏰ Pontual</span>
+          <span class="vibe-chip vibe-pos">🔥 Intensidade</span>
+          <span class="vibe-chip vibe-pos">🎯 Técnico</span>
+        </div>
+      </div>
+
+      <div class="pro-banner">
+        <div class="pro-banner-text"><h3>SportVibe Pro ⚡</h3><p>Likes ilimitados · Boost · Zero ads</p></div>
+        <button class="btn-pro" onclick="showModal('pro-modal')">Ver planos</button>
+      </div>
+
+      <div class="menu-list">
+        <button class="menu-item" onclick="showModal('edit-profile-modal')"><div class="menu-icon" style="background:rgba(108,99,255,0.15)">✏️</div><span class="menu-item-label">Editar Perfil</span><span class="menu-chevron">›</span></button>
+        <button class="menu-item" onclick="showModal('notifications-modal')"><div class="menu-icon" style="background:rgba(6,214,160,0.15)">🔔</div><span class="menu-item-label">Notificações</span><span class="menu-chevron">›</span></button>
+        <button class="menu-item" onclick="showModal('privacy-modal')"><div class="menu-icon" style="background:rgba(255,183,3,0.15)">🔒</div><span class="menu-item-label">Privacidade</span><span class="menu-chevron">›</span></button>
+        <button class="menu-item" onclick="logout()"><div class="menu-icon" style="background:rgba(255,77,109,0.15)">🚪</div><span class="menu-item-label" style="color:var(--danger)">Sair</span><span class="menu-chevron">›</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES TAB -->
+  <div class="screen" id="messages-tab">
+    <div class="status-bar"><span id="clk-msg">09:41</span><div style="display:flex;gap:6px;align-items:center;"><svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+    <div class="page-header"><div class="page-title">Mensagens</div></div>
+    <div class="screen-content" id="messages-list">
+      <!-- Partidas fixas -->
+      <div style="padding:8px 16px 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Partidas</div>
+      <div class="conv-item" onclick="openGroupChat('Futsal Society','⚽')">
+        <div class="conv-av conv-av-group">⚽</div>
+        <div class="conv-info"><div class="conv-name">Futsal Society</div><div class="conv-last">Pessoal, que horas encontramos antes da partida?</div></div>
+        <div class="conv-meta"><div class="conv-time">19h00</div><div class="conv-unread">2</div></div>
+      </div>
+      <div class="conv-item" onclick="openGroupChat('Padel Dupla','🎾')">
+        <div class="conv-av conv-av-group">🎾</div>
+        <div class="conv-info"><div class="conv-name">Padel Dupla</div><div class="conv-last">Confirmado ✅</div></div>
+        <div class="conv-meta"><div class="conv-time">ontem</div></div>
+      </div>
+      <!-- Matches dinâmicos -->
+      <div style="padding:16px 16px 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Matches</div>
+      <div id="matches-list">
+        <div class="msg-empty">
+          <div class="msg-empty-icon">💜</div>
+          <div class="msg-empty-text">Nenhum match ainda</div>
+          <div class="msg-empty-sub">Dê swipe right em jogadores para dar match e conversar.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" onclick="navTo('match-tab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Match <span class="nav-badge" id="match-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="navTo('quadras-tab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      Quadras
+    </button>
+    <button class="nav-item" onclick="navTo('messages-tab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Msgs <span class="nav-badge" id="msg-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="navTo('agenda-tab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </button>
+    <button class="nav-item" onclick="navTo('profile-tab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </button>
+  </nav>
+
+  <!-- MODAL: MATCH -->
+  <div class="modal-overlay" id="match-modal">
+    <div class="modal-sheet"><div class="modal-handle"></div>
+      <div class="match-confetti">🎉🎊✨</div>
+      <div class="match-title">É um Match!</div>
+      <p style="color:var(--text2);font-size:14px;margin-top:8px;text-align:center">Vocês dois se curtiram</p>
+      <div class="match-avatars">
+        <div class="match-avatar user-avatar" style="background:linear-gradient(135deg,#6C63FF,#8B5CF6);background-size:cover;background-position:center">M</div>
+        <div style="font-size:26px">💜</div>
+        <div class="match-avatar" id="m-av" style="background:linear-gradient(135deg,#06D6A0,#00A878)">R</div>
+      </div>
+      <p id="m-name" style="font-size:16px;font-weight:700;margin-bottom:20px;text-align:center">Rafael S. · ⚡ 92</p>
+      <button class="btn-msg" id="match-chat-btn" onclick="closeModal('match-modal');openMatchChat()">💬 Mandar mensagem</button>
+      <button class="btn-continue" onclick="closeModal('match-modal')">Continuar buscando</button>
+    </div>
+  </div>
+
+  <!-- MODAL: BOOKING -->
+  <div class="modal-overlay" id="booking-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('booking-modal')">×</button>
+      <div class="modal-title" id="bk-title">Reservar Quadra</div>
+      <div class="modal-sub">Escolha o dia e horário</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+        <div class="time-slot selected" style="min-width:58px" onclick="selDay(this)">Seg<br><small style="opacity:0.7">19</small></div>
+        <div class="time-slot" style="min-width:58px" onclick="selDay(this)">Ter<br><small style="opacity:0.7">20</small></div>
+        <div class="time-slot" style="min-width:58px" onclick="selDay(this)">Qua<br><small style="opacity:0.7">21</small></div>
+        <div class="time-slot" style="min-width:58px" onclick="selDay(this)">Qui<br><small style="opacity:0.7">22</small></div>
+        <div class="time-slot" style="min-width:58px" onclick="selDay(this)">Sex<br><small style="opacity:0.7">23</small></div>
+        <div class="time-slot" style="min-width:58px" onclick="selDay(this)">Sáb<br><small style="opacity:0.7">24</small></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Horários disponíveis</div>
+      <div class="time-slots">
+        <div class="time-slot taken">08:00</div><div class="time-slot taken">09:00</div>
+        <div class="time-slot" onclick="selTime(this)">10:00</div><div class="time-slot" onclick="selTime(this)">11:00</div>
+        <div class="time-slot taken">13:00</div><div class="time-slot" onclick="selTime(this)">14:00</div>
+        <div class="time-slot selected" onclick="selTime(this)">15:00</div><div class="time-slot" onclick="selTime(this)">16:00</div>
+        <div class="time-slot" onclick="selTime(this)">17:00</div><div class="time-slot taken">19:00</div>
+        <div class="time-slot" onclick="selTime(this)">20:00</div><div class="time-slot" onclick="selTime(this)">21:00</div>
+      </div>
+      <div class="booking-summary">
+        <div><div style="font-size:13px;color:var(--text2)">Total (1 hora)</div><div id="bk-price" style="font-size:22px;font-weight:800;color:var(--accent)">R$ 80,00</div></div>
+        <div style="text-align:right"><div style="font-size:13px;color:var(--text2)">Pagamento</div><div style="font-size:12px;color:var(--accent);font-weight:700">⚡ PIX instantâneo</div></div>
+      </div>
+      <button class="btn-primary" onclick="confirmBooking()">⚡ Pagar com PIX</button>
+    </div>
+  </div>
+
+  <!-- MODAL: VIBE CHECK -->
+  <div class="modal-overlay" id="vibecheck-modal">
+    <div class="modal-sheet"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('vibecheck-modal')">×</button>
+      <div class="modal-title">Vibe Check 360°</div>
+      <div class="modal-sub">Como foi jogar com Rafael S.?</div>
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">👍 Positivo</div>
+      <div class="vibe-options">
+        <div class="vibe-option" onclick="tv(this,'pos')">🤝 Bom de Grupo</div>
+        <div class="vibe-option" onclick="tv(this,'pos')">⚡ Fair Play</div>
+        <div class="vibe-option" onclick="tv(this,'pos')">⏰ Pontual</div>
+        <div class="vibe-option" onclick="tv(this,'pos')">🔥 Intensidade</div>
+        <div class="vibe-option" onclick="tv(this,'pos')">🎯 Técnico</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px">👎 Negativo</div>
+      <div class="vibe-options">
+        <div class="vibe-option" onclick="tv(this,'neg')">👻 No-Show</div>
+        <div class="vibe-option" onclick="tv(this,'neg')">😤 Tóxico</div>
+        <div class="vibe-option" onclick="tv(this,'neg')">📉 Mal Nível</div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px" onclick="closeModal('vibecheck-modal');showToast('⚡ Vibe Check enviado! SportScore atualizado.')">Enviar avaliação</button>
+    </div>
+  </div>
+
+  <!-- MODAL: CRIAR PARTIDA -->
+  <div class="modal-overlay" id="create-partida-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('create-partida-modal')">×</button>
+      <div class="modal-title">Criar Partida</div>
+      <div class="modal-sub">Monte seu jogo e encontre jogadores</div>
+      <div class="modal-field"><label>Esporte</label>
+        <div class="sport-grid">
+          <div class="sport-option selected" onclick="selSport(this)"><span class="s-icon">⚽</span><span class="s-label">Futsal</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">⚽</span><span class="s-label">F. Society</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">⚽</span><span class="s-label">F. Campo</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🎾</span><span class="s-label">Padel</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🎾</span><span class="s-label">Tênis</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🎾</span><span class="s-label">Beach Tennis</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🏐</span><span class="s-label">Vôlei</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🏖️</span><span class="s-label">V. de Areia</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🏐</span><span class="s-label">Futevolei</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🏀</span><span class="s-label">Basquete</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🎾</span><span class="s-label">Squash</span></div>
+          <div class="sport-option" onclick="selSport(this)"><span class="s-icon">🏓</span><span class="s-label">Ping Pong</span></div>
+        </div>
+      </div>
+      <div class="modal-field"><label>Quadra</label>
+        <select class="modal-select">
+          <option>Arena Champions — R. XV de Novembro</option>
+          <option>Padel Center BNU — R. Hermann Hering</option>
+          <option>Sport Club Blumenau — R. Osvaldo Cruz</option>
+          <option>Sem quadra definida ainda</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field"><label>Data</label><input type="date" class="modal-select" style="color:var(--text2)"/></div>
+        <div class="modal-field"><label>Horário</label><input type="time" class="modal-select" value="19:00" style="color:var(--text2)"/></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field"><label>Vagas abertas</label>
+          <select class="modal-select"><option>2</option><option>3</option><option selected>4</option><option>6</option><option>8</option><option>10</option></select>
+        </div>
+        <div class="modal-field"><label>Nível mínimo</label>
+          <select class="modal-select"><option>Iniciante</option><option selected>Intermediário</option><option>Avançado</option></select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="closeModal('create-partida-modal');showToast('🎯 Partida publicada!')">⚡ Publicar partida</button>
+    </div>
+  </div>
+
+  <!-- MODAL: PRO -->
+  <div class="modal-overlay" id="pro-modal">
+    <div class="modal-sheet"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('pro-modal')">×</button>
+      <div style="text-align:center;margin-bottom:16px"><div style="font-size:36px">⚡</div><div class="modal-title" style="text-align:center">SportVibe Pro</div><div class="modal-sub" style="text-align:center">Desbloqueie todo o seu potencial</div></div>
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+        <div style="flex:1;background:var(--surface);border-radius:16px;padding:16px;border:1.5px solid var(--border)"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:6px">MENSAL</div><div style="font-size:22px;font-weight:900">R$29,90</div><div style="font-size:12px;color:var(--text3)">por mês</div></div>
+        <div style="flex:1;background:rgba(108,99,255,0.12);border-radius:16px;padding:16px;border:1.5px solid var(--primary);position:relative">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;white-space:nowrap">POPULAR</div>
+          <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:6px">TRIMESTRAL</div><div style="font-size:22px;font-weight:900;color:var(--primary)">R$19,90</div><div style="font-size:12px;color:var(--text3)">/mês · 3 meses</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;font-size:14px">
+        <div>✅ Likes ilimitados</div><div>✅ Ver quem te curtiu</div>
+        <div>✅ Boost semanal no ranking</div><div>✅ Zero anúncios</div>
+      </div>
+      <button class="btn-primary" onclick="closeModal('pro-modal');showToast('🚀 Redirecionando para pagamento...')">Assinar Pro agora</button>
+      <button style="width:100%;background:none;color:var(--text3);padding:12px;font-size:14px;margin-top:8px" onclick="closeModal('pro-modal')">Agora não</button>
+    </div>
+  </div>
+
+  <!-- MODAL: CHAT 1-ON-1 -->
+  <div class="modal-overlay" id="chat-modal">
+    <div class="modal-sheet" style="max-height:90vh;display:flex;flex-direction:column;padding-bottom:24px;">
+      <div class="modal-handle"></div>
+      <div class="chat-header">
+        <div class="chat-av" id="chat-av" style="background:linear-gradient(135deg,#06D6A0,#00A878)">R</div>
+        <div style="flex:1"><div style="font-size:16px;font-weight:700" id="chat-name">Rafael S.</div><div style="font-size:12px;color:var(--accent)" id="chat-score">⚡ 92</div></div>
+        <button class="icon-btn" onclick="closeModal('chat-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input id="chat-input" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter')sendChatMsg()"/>
+        <button class="chat-send-btn" onclick="sendChatMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHAT GRUPO (PARTIDA) -->
+  <div class="modal-overlay" id="group-chat-modal">
+    <div class="modal-sheet" style="max-height:90vh;display:flex;flex-direction:column;padding-bottom:24px;">
+      <div class="modal-handle"></div>
+      <div class="chat-header">
+        <div class="chat-av" id="gc-av" style="background:rgba(108,99,255,0.3);font-size:22px">⚽</div>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:700" id="gc-name">Futsal Society</div>
+          <button id="gc-members-btn" onclick="openGroupMembers()" style="background:none;padding:0;font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;text-align:left;">Chat da Partida · <span id="gc-count">5</span> jogadores ›</button>
+        </div>
+        <button class="icon-btn" onclick="closeModal('group-chat-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="chat-messages" id="gc-messages"></div>
+      <div class="chat-input-row">
+        <input id="gc-input" placeholder="Mensagem para o grupo..." onkeydown="if(event.key==='Enter')sendGcMsg()"/>
+        <button class="chat-send-btn" onclick="sendGcMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MEMBROS DA PARTIDA -->
+  <div class="modal-overlay" id="group-members-modal">
+    <div class="modal-sheet" style="max-height:80vh;overflow-y:auto">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('group-members-modal')">×</button>
+      <div class="modal-title" id="gm-title">Jogadores da Partida</div>
+      <div class="modal-sub" id="gm-sub">5 jogadores confirmados</div>
+      <div id="gm-list" style="display:flex;flex-direction:column;gap:2px;margin-top:10px"></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:14px;text-align:center">👆 Toque em um jogador para ver o perfil</div>
+    </div>
+  </div>
+
+  <!-- MODAL: PERFIL DO JOGADOR -->
+  <div class="modal-overlay" id="player-profile-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('player-profile-modal')">×</button>
+      <div class="pp-bg" id="pp-bg">
+        <div class="pp-avatar" id="pp-av">R</div>
+        <div class="player-rank-badge rank-gold" id="pp-rank" style="position:absolute;bottom:12px;right:12px">🥇 Ouro</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div><div style="font-size:22px;font-weight:800" id="pp-name">Rafael S.</div><div style="font-size:13px;color:var(--text2);margin-top:2px" id="pp-meta">24 anos · 📍 1.2 km</div></div>
+        <div class="sport-score-chip" id="pp-score">⚡ 92</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px">Esportes</div>
+      <div class="pp-tags" id="pp-sports"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 8px">Vibe Tags</div>
+      <div class="pp-tags" id="pp-vibes"></div>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn-primary" style="flex:1;margin-top:0" id="pp-like-btn" onclick="closeModal('player-profile-modal');swipeCard('right')">♥ Curtir</button>
+        <button style="flex:1;padding:16px;border-radius:14px;background:var(--surface);color:var(--text3);font-size:14px;font-weight:600;border:1.5px solid var(--border);cursor:pointer" onclick="showToast('🔒 Dê match com este jogador primeiro!')">🔒 Match p/ chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHE DA PARTIDA -->
+  <div class="modal-overlay" id="partida-detail-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('partida-detail-modal')">×</button>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+        <div class="partida-sport-icon" id="pd-sport-icon">⚽</div>
+        <div><div style="font-size:21px;font-weight:800" id="pd-name">Futsal Society</div><div style="font-size:13px;color:var(--text2);margin-top:2px" id="pd-level">Intermediário</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;font-size:14px;color:var(--text2)">
+        <div>📅 <span style="color:var(--text);font-weight:600" id="pd-date"></span></div>
+        <div>📍 <span style="color:var(--text);font-weight:600" id="pd-local"></span></div>
+        <div>🎯 Score mínimo: <span style="color:var(--primary);font-weight:700" id="pd-score"></span></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Confirmados</div>
+      <div style="display:flex;align-items:center;margin-bottom:20px">
+        <div class="players-row" id="pd-players"></div>
+        <span class="vagas-badge" id="pd-vagas"></span>
+      </div>
+      <button class="btn-primary" onclick="closeModal('partida-detail-modal');swipeCard('right')">⚡ Solicitar entrada</button>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR PERFIL -->
+  <div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('edit-profile-modal')">×</button>
+      <div class="modal-title">Editar Perfil</div>
+      <div style="height:12px"></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:12px;background:var(--surface);border-radius:14px;border:1px solid var(--border)">
+        <div id="ep-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6C63FF,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;background-size:cover;background-position:center;flex-shrink:0">M</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">Foto de perfil</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Aparece em todo o app</div>
+          <div style="display:flex;gap:8px">
+            <label for="ep-avatar-input" style="background:var(--primary);color:white;padding:6px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:inline-block">📷 Trocar foto</label>
+            <button onclick="clearUserAvatar()" style="background:var(--surface2);color:var(--text2);padding:6px 14px;border-radius:10px;font-size:12px;font-weight:600;border:none;cursor:pointer">Remover</button>
+          </div>
+          <input id="ep-avatar-input" type="file" accept="image/*" onchange="handleAvatarUpload(event)" style="display:none"/>
+        </div>
+      </div>
+      <div class="field"><label>Nome</label><input type="text" value="Mateus" id="ep-name"/></div>
+      <div class="field"><label>Cidade</label><input type="text" value="Blumenau, SC"/></div>
+      <div class="field"><label>Bio</label><input type="text" placeholder="Fale um pouco sobre você..." value="Apaixonado por esportes e boa energia 🏅"/></div>
+      <div class="modal-field"><label style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px">Esportes favoritos</label>
+        <div class="edit-sport-grid">
+          <span class="edit-sport-chip sel" onclick="this.classList.toggle('sel')">⚽ Futsal</span>
+          <span class="edit-sport-chip sel" onclick="this.classList.toggle('sel')">🎾 Padel</span>
+          <span class="edit-sport-chip" onclick="this.classList.toggle('sel')">🏐 Vôlei</span>
+          <span class="edit-sport-chip" onclick="this.classList.toggle('sel')">🏀 Basquete</span>
+          <span class="edit-sport-chip sel" onclick="this.classList.toggle('sel')">🏓 Ping Pong</span>
+          <span class="edit-sport-chip" onclick="this.classList.toggle('sel')">🎾 Tênis</span>
+          <span class="edit-sport-chip" onclick="this.classList.toggle('sel')">🎾 Beach Tennis</span>
+          <span class="edit-sport-chip" onclick="this.classList.toggle('sel')">🎾 Squash</span>
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px" onclick="saveProfile()">Salvar alterações</button>
+    </div>
+  </div>
+
+  <!-- MODAL: NOTIFICAÇÕES -->
+  <div class="modal-overlay" id="notifications-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('notifications-modal')">×</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-right:42px">
+        <div class="modal-title" style="margin-bottom:0">Notificações</div>
+        <button style="background:none;color:var(--primary);font-size:13px;font-weight:600;cursor:pointer" onclick="markAllNotifsRead()">Marcar como lidas</button>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:rgba(6,214,160,0.12)">💚</div>
+        <div class="notif-body"><div class="notif-title">Match com Rafael S.!</div><div class="notif-sub">Vocês dois se curtiram. Manda uma mensagem agora.</div><div class="notif-time">há 5 min</div></div>
+        <div class="notif-unread"></div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:rgba(255,183,3,0.12)">⏰</div>
+        <div class="notif-body"><div class="notif-title">Confirme presença — Futsal hoje!</div><div class="notif-sub">Sua partida começa em 2 horas. Confirme até as 17h.</div><div class="notif-time">há 1h</div></div>
+        <div class="notif-unread"></div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:rgba(108,99,255,0.12)">⚡</div>
+        <div class="notif-body"><div class="notif-title">Seu SportScore subiu!</div><div class="notif-sub">Você ganhou +3 pontos após o Vibe Check de Ana C.</div><div class="notif-time">há 3h</div></div>
+        <div class="notif-unread"></div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:rgba(255,77,109,0.12)">❤️</div>
+        <div class="notif-body"><div class="notif-title">Lucas M. te curtiu</div><div class="notif-sub">Veja o perfil dele e curta de volta para dar match!</div><div class="notif-time">há 5h</div></div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon" style="background:rgba(6,214,160,0.12)">🏆</div>
+        <div class="notif-body"><div class="notif-title">Vibe Check disponível</div><div class="notif-sub">Como foi o Basquete 5x5 com Pedro A.?</div><div class="notif-time">ontem</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PRIVACIDADE -->
+  <div class="modal-overlay" id="privacy-modal">
+    <div class="modal-sheet" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeModal('privacy-modal')">×</button>
+      <div class="modal-title">Privacidade</div>
+      <div style="height:4px"></div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Perfil visível</div><div class="privacy-sub">Outros jogadores podem ver seu perfil no match</div></div>
+        <label class="toggle-wrap"><input type="checkbox" checked onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Mostrar distância</div><div class="privacy-sub">Exibir sua distância aproximada nos cards</div></div>
+        <label class="toggle-wrap"><input type="checkbox" checked onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Mostrar SportScore</div><div class="privacy-sub">Seu score fica visível para outros jogadores</div></div>
+        <label class="toggle-wrap"><input type="checkbox" checked onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Aparecer no ranking</div><div class="privacy-sub">Seu nome aparece no ranking da cidade</div></div>
+        <label class="toggle-wrap"><input type="checkbox" checked onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Receber mensagens</div><div class="privacy-sub">Apenas matches podem te mandar mensagem</div></div>
+        <label class="toggle-wrap"><input type="checkbox" checked onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="privacy-item">
+        <div><div class="privacy-label">Modo anônimo</div><div class="privacy-sub">Navega sem aparecer para outros (sem match)</div></div>
+        <label class="toggle-wrap"><input type="checkbox" onchange="showToast('✅ Configuração salva')"/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+  // DATA
+  const cards = [
+    {type:'player',name:'Rafael S.',age:24,rank:'gold',score:92,dist:'1.2 km',sports:['⚽ Futsal','🎾 Padel'],tags:['futsal','padel'],vibes:['⚡ Fair Play','🤝 Bom de Grupo','⏰ Pontual'],color:'linear-gradient(135deg,#06D6A0,#00A878)',init:'R',v:true},
+    {type:'player',name:'Ana C.',age:22,rank:'gold',score:88,dist:'0.8 km',sports:['🏐 Vôlei','🎾 Tênis'],tags:['volei','tenis'],vibes:['🎯 Técnico','⚡ Fair Play'],color:'linear-gradient(135deg,#FF4D6D,#C1121F)',init:'A',v:true},
+    {type:'partida',sport:'⚽',name:'Futsal Society',local:'Arena Champions',dist:'1.2 km',date:'Hoje 19h00',vagas:7,players:['M','R','C','A','L'],minScore:60,level:'Intermediário',tags:['futsal'],colors:['#6C63FF','#06D6A0','#FFB703','#FF4D6D','#8B5CF6']},
+    {type:'player',name:'Lucas M.',age:28,rank:'silver',score:78,dist:'2.1 km',sports:['🏀 Basquete','⚽ Futsal'],tags:['basquete','futsal'],vibes:['🔥 Intensidade','🎯 Técnico','🤝 Bom de Grupo'],color:'linear-gradient(135deg,#FFB703,#FF6B35)',init:'L',v:false},
+    {type:'partida',sport:'🎾',name:'Padel Dupla',local:'Padel Center BNU',dist:'2.4 km',date:'Amanhã 20h00',vagas:2,players:['J','K'],minScore:70,level:'Avançado',tags:['padel'],colors:['#06D6A0','#8B5CF6']},
+    {type:'player',name:'Julia F.',age:26,rank:'silver',score:74,dist:'1.8 km',sports:['🏓 Ping Pong','🎾 Tênis'],tags:['pingpong','tenis'],vibes:['⏰ Pontual','⚡ Fair Play'],color:'linear-gradient(135deg,#8B5CF6,#6C63FF)',init:'J',v:true},
+    {type:'partida',sport:'🏀',name:'Basquete 5x5',local:'Sport Club BNU',dist:'3.1 km',date:'Sáb 10h00',vagas:8,players:['P','F'],minScore:50,level:'Iniciante',tags:['basquete'],colors:['#FF4D6D','#FFB703']},
+    {type:'player',name:'Rodrigo T.',age:31,rank:'gold',score:89,dist:'0.5 km',sports:['🎾 Beach Tennis','🎾 Squash'],tags:['beachtennis','squash'],vibes:['🔥 Intensidade','🎯 Técnico'],color:'linear-gradient(135deg,#FFB703,#FF6B35)',init:'R',v:true},
+    {type:'partida',sport:'🏖️',name:'Vôlei de Areia 2x2',local:'Praia Artificial BNU',dist:'2.8 km',date:'Dom 09h00',vagas:2,players:['K','G'],minScore:55,level:'Intermediário',tags:['areia'],colors:['#06D6A0','#FFB703']},
+    {type:'player',name:'Camila F.',age:25,rank:'silver',score:76,dist:'1.5 km',sports:['🏖️ V. de Areia','🏐 Futevolei'],tags:['areia','futevolei'],vibes:['⏰ Pontual','🤝 Bom de Grupo'],color:'linear-gradient(135deg,#06D6A0,#00A878)',init:'C',v:true},
+    {type:'partida',sport:'⚽',name:'Futebol Society 7x7',local:'Arena Society BNU',dist:'4.2 km',date:'Sáb 08h00',vagas:6,players:['D','E','T'],minScore:45,level:'Iniciante',tags:['society'],colors:['#8B5CF6','#FF4D6D','#FFB703']},
+  ];
+
+  let idx=0, curType='all', curSport='todos';
+
+  // ── DIRETÓRIO DE PERFIS ──
+  // Reúne dados de jogadores que aparecem em cards, agenda, e ranking.
+  // Usado para abrir perfil pelo nome via openPlayerByName(name).
+  // 'played' = você já jogou com este atleta (vem da agenda fixa)
+  const playerDirectory = {
+    // Players dos cards
+    'Rafael S.':{init:'R',color:'linear-gradient(135deg,#06D6A0,#00A878)',rank:'gold',score:92,age:24,dist:'1.2 km',sports:['⚽ Futsal','🎾 Padel'],vibes:['⚡ Fair Play','🤝 Bom de Grupo','⏰ Pontual'],played:true},
+    'Ana C.':{init:'A',color:'linear-gradient(135deg,#FF4D6D,#C1121F)',rank:'gold',score:88,age:22,dist:'0.8 km',sports:['🏐 Vôlei','🎾 Tênis'],vibes:['🎯 Técnico','⚡ Fair Play'],played:true},
+    'Lucas M.':{init:'L',color:'linear-gradient(135deg,#FFB703,#FF6B35)',rank:'silver',score:78,age:28,dist:'2.1 km',sports:['🏀 Basquete','⚽ Futsal'],vibes:['🔥 Intensidade','🎯 Técnico','🤝 Bom de Grupo'],played:true},
+    'Julia F.':{init:'J',color:'linear-gradient(135deg,#8B5CF6,#6C63FF)',rank:'silver',score:74,age:26,dist:'1.8 km',sports:['🏓 Ping Pong','🎾 Tênis'],vibes:['⏰ Pontual','⚡ Fair Play']},
+    'Rodrigo T.':{init:'R',color:'linear-gradient(135deg,#FFB703,#FF6B35)',rank:'gold',score:89,age:31,dist:'0.5 km',sports:['🎾 Beach Tennis','🎾 Squash'],vibes:['🔥 Intensidade','🎯 Técnico']},
+    'Camila F.':{init:'C',color:'linear-gradient(135deg,#06D6A0,#00A878)',rank:'silver',score:76,age:25,dist:'1.5 km',sports:['🏖️ V. de Areia','🏐 Futevolei'],vibes:['⏰ Pontual','🤝 Bom de Grupo']},
+    // Players da agenda (que você já jogou ou está marcado para jogar)
+    'Carlos F.':{init:'C',color:'linear-gradient(135deg,#FFB703,#FF6B35)',rank:'silver',score:71,age:30,dist:'1.5 km',sports:['⚽ Futsal','🎾 Padel'],vibes:['⏰ Pontual','🤝 Bom de Grupo'],played:true},
+    'Juliana K.':{init:'J',color:'linear-gradient(135deg,#8B5CF6,#6C63FF)',rank:'gold',score:84,age:27,dist:'2.0 km',sports:['🎾 Padel','🎾 Tênis'],vibes:['🎯 Técnico','⚡ Fair Play'],played:true},
+    'Kaique S.':{init:'K',color:'linear-gradient(135deg,#FFB703,#FF6B35)',rank:'silver',score:73,age:24,dist:'1.6 km',sports:['🎾 Padel','🏐 Vôlei'],vibes:['🔥 Intensidade','⏰ Pontual'],played:true},
+    'Fernanda S.':{init:'F',color:'linear-gradient(135deg,#FF4D6D,#C1121F)',rank:'silver',score:70,age:29,dist:'3.0 km',sports:['🎾 Padel','🏐 Vôlei'],vibes:['🤝 Bom de Grupo','⏰ Pontual'],played:true},
+    'Pedro A.':{init:'P',color:'linear-gradient(135deg,#8B5CF6,#6C63FF)',rank:'silver',score:79,age:26,dist:'1.9 km',sports:['🏀 Basquete','⚽ Futsal'],vibes:['🔥 Intensidade','🤝 Bom de Grupo'],played:true},
+  };
+
+  // Foto de perfil do user (DataURL ou null)
+  let userAvatar = null;
+
+  // Clock
+  function tick(){const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');document.querySelectorAll('#clk,#clk-msg').forEach(e=>e.textContent=t);}
+  tick(); setInterval(tick,30000);
+
+  // Screens
+  function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
+  function navTo(id,btn){
+    show(id);
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    if(btn)btn.classList.add('active');
+    if(id==='match-tab'){
+      renderCards();
+      const mb=document.getElementById('match-badge');if(mb)mb.style.display='none';
+    }
+    if(id==='messages-tab'){
+      const mgb=document.getElementById('msg-badge');if(mgb)mgb.style.display='none';
+    }
+  }
+
+  // Splash
+  setTimeout(()=>show('onboarding'),2500);
+
+  // Onboarding
+  let slide=0;
+  function nextSlide(){
+    const sl=document.querySelectorAll('.onb-slide'),dt=document.querySelectorAll('.onb-dot');
+    if(slide<sl.length-1){
+      sl[slide].classList.remove('active');sl[slide].classList.add('out');
+      setTimeout(()=>sl[slide].classList.remove('out'),400);
+      dt[slide].classList.remove('active');
+      slide++;
+      sl[slide].classList.add('active');
+      dt[slide].classList.add('active');
+      if(slide===sl.length-1)document.getElementById('onb-btn').textContent='Começar ⚡';
+    } else {
+      goToAuth();
+    }
+  }
+  function goToAuth(){show('auth');}
+  function authTab(tab,btn){document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';}
+  function enterApp(){
+    show('match-tab');
+    document.getElementById('bottom-nav').classList.add('visible');
+    // Reset nav active to Match
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    const matchNav=document.querySelector('.nav-item');
+    if(matchNav)matchNav.classList.add('active');
+    setTimeout(renderCards,80);
+    showToast('⚡ Bem-vindo ao SportVibe!');
+  }
+  function logout(){
+    showToast('👋 Até logo!');
+    document.getElementById('bottom-nav').classList.remove('visible');
+    // Reset onboarding state
+    slide=0;
+    document.querySelectorAll('.onb-slide').forEach((s,i)=>{s.classList.toggle('active',i===0);s.classList.remove('out');});
+    document.querySelectorAll('.onb-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
+    const ob=document.getElementById('onb-btn');if(ob)ob.textContent='Próximo →';
+    setTimeout(()=>show('auth'),450);
+  }
+
+  // Cards
+  function getFiltered(){
+    return cards.filter(c=>{
+      if(curType==='players'&&c.type!=='player')return false;
+      if(curType==='partidas'&&c.type!=='partida')return false;
+      if(curSport && curSport!=='todos' && !(c.tags||[]).includes(curSport))return false;
+      return true;
+    });
+  }
+
+  function renderCards(){
+    const stack=document.getElementById('card-stack');stack.innerHTML='';
+    const f=getFiltered();
+    if(f.length===0){
+      stack.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text2);width:100%">
+        <div style="font-size:48px;opacity:0.5;margin-bottom:12px">😴</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">Nenhum resultado por aqui</div>
+        <div style="font-size:13px;color:var(--text3)">Tente outro tipo ou esporte</div>
+      </div>`;
+      return;
+    }
+    if(idx>=f.length)idx=0;
+    const sl=[];
+    for(let i=0;i<Math.min(3,f.length);i++)sl.push(f[(idx+i)%f.length]);
+    [...sl].reverse().forEach(d=>{const el=buildCard(d);stack.appendChild(el);});
+    initSwipe(stack.firstElementChild);
+  }
+
+  function buildCard(d){
+    const div=document.createElement('div');div.className='swipe-card';div._cardData=d;
+    if(d.type==='player'){
+      div.innerHTML=`<span class="card-badge like">LIKE</span><span class="card-badge nope">NOPE</span>
+      <div class="player-card-bg" style="background:${d.color}">
+        <div class="player-avatar">${d.init}</div>
+        <div class="player-rank-badge rank-${d.rank}">${d.rank==='gold'?'🥇 Ouro':d.rank==='silver'?'🥈 Prata':'🥉 Bronze'}</div>
+      </div>
+      <div class="player-card-info" style="cursor:pointer">
+        <div class="player-name-row"><span class="player-name">${d.name}</span>${d.v?'<span class="verify-badge">✓</span>':''}<span class="sport-score-chip">⚡ ${d.score}</span></div>
+        <div class="player-meta"><span>${d.age} anos</span><span>📍 ${d.dist}</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${d.sports.map(s=>`<span style="background:var(--surface2);padding:3px 10px;border-radius:20px;font-size:12px;color:var(--text2);font-weight:600">${s}</span>`).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${d.vibes.map(v=>`<span class="vibe-tag">${v}</span>`).join('')}</div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text3);text-align:center">👆 Toque para ver perfil completo</div>
+      </div>`;
+    } else {
+      div.innerHTML=`<span class="card-badge like">ENTRAR</span><span class="card-badge nope">PASSAR</span>
+      <div class="partida-header"><div class="partida-sport-icon">${d.sport}</div><div><div class="partida-title">${d.name}</div><div class="partida-sub">${d.level}</div></div></div>
+      <div class="partida-detail">📅 <strong>${d.date}</strong></div>
+      <div class="partida-detail">📍 <strong>${d.local}</strong> · ${d.dist}</div>
+      <div class="partida-detail">🎯 Score mínimo: <strong>⚡ ${d.minScore}</strong></div>
+      <div class="partida-players" style="cursor:pointer">
+        <div class="partida-players-label">Jogadores confirmados</div>
+        <div style="display:flex;align-items:center">
+          <div class="players-row">${d.players.map((p,i)=>`<div class="mini-avatar" style="background:${d.colors[i]||'#6C63FF'}">${p}</div>`).join('')}</div>
+          <span class="vagas-badge">+${d.vagas} vagas</span>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text3)">👆 Toque para ver detalhes da partida</div>
+      </div>`;
+    }
+    return div;
+  }
+
+  function initSwipe(card){
+    if(!card)return;
+    let sx=0,sy=0,dx=0,dy=0,dragging=false;
+    const start=e=>{sx=(e.touches?e.touches[0].clientX:e.clientX);sy=(e.touches?e.touches[0].clientY:e.clientY);dx=0;dy=0;dragging=true;card.style.transition='none';};
+    const move=e=>{
+      if(!dragging)return;
+      dx=(e.touches?e.touches[0].clientX:e.clientX)-sx;
+      dy=(e.touches?e.touches[0].clientY:e.clientY)-sy;
+      // Only hijack if horizontal drag is dominant
+      if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
+      if(Math.abs(dy)>Math.abs(dx)*1.5){dragging=false;card.style.transition='transform 0.3s';card.style.transform='';return;}
+      card.style.transform=`translateX(${dx}px) rotate(${dx*0.035}deg)`;
+      const lk=card.querySelector('.card-badge.like'),np=card.querySelector('.card-badge.nope');
+      if(lk)lk.style.opacity=Math.max(0,dx/90);if(np)np.style.opacity=Math.max(0,-dx/90);
+      if(e.cancelable)e.preventDefault();
+    };
+    const end=()=>{
+      if(!dragging)return;dragging=false;
+      if(Math.abs(dx)<8&&Math.abs(dy)<8){
+        // It was a tap — open detail
+        const d=card._cardData;
+        if(d&&d.type==='player')openPlayerProfile(d);
+        else if(d&&d.type==='partida')openPartidaDetail(d);
+        return;
+      }
+      if(Math.abs(dx)>90)fly(card,dx>0?'right':'left');
+      else{card.style.transition='transform 0.4s cubic-bezier(0.4,0,0.2,1)';card.style.transform='';card.querySelectorAll('.card-badge').forEach(b=>b.style.opacity=0);}
+      dx=0;dy=0;
+    };
+    card.addEventListener('mousedown',start);document.addEventListener('mousemove',move);document.addEventListener('mouseup',end);
+    card.addEventListener('touchstart',start,{passive:true});card.addEventListener('touchmove',move,{passive:false});card.addEventListener('touchend',end);
+  }
+
+  function fly(card,dir){
+    if(!card)return;
+    const swiped=card._cardData;
+    card.style.transition='transform 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.38s';
+    card.style.transform=`translateX(${dir==='right'?'160%':'-160%'}) rotate(${dir==='right'?22:-22}deg)`;
+    card.style.opacity='0';
+    idx++;
+    setTimeout(()=>{
+      renderCards();
+      if(dir==='right'&&swiped){
+        if(swiped.type==='player'&&Math.random()>0.45){showMatchCard(swiped);}
+        else if(swiped.type==='partida')showToast('✅ Solicitação enviada!');
+      }
+    },360);
+  }
+
+  function swipeCard(dir){const s=document.getElementById('card-stack'),c=s.firstElementChild;if(c&&c._cardData)fly(c,dir);}
+  function superLike(){
+    const s=document.getElementById('card-stack'),c=s.firstElementChild;
+    if(!c||!c._cardData){showToast('⭐ Sem cards no momento');return;}
+    showToast('⭐ Super Like enviado!');
+    // Super Like = match garantido se for player
+    const swiped=c._cardData;
+    c.style.transition='transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s';
+    c.style.transform='translateY(-160%) rotate(0deg) scale(1.05)';c.style.opacity='0';
+    idx++;
+    setTimeout(()=>{
+      renderCards();
+      if(swiped.type==='player')showMatchCard(swiped);
+      else showToast('✅ Solicitação enviada!');
+    },420);
+  }
+  function setType(t,btn){curType=t;document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');idx=0;renderCards();}
+  function filterSport(el){
+    const container=el.parentElement;
+    container.querySelectorAll('.sport-pill').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+    curSport=(el.dataset.sport||'todos').toLowerCase();
+    idx=0;
+    renderCards();
+    // scroll active pill into view
+    try{el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}catch(e){}
+  }
+
+  function showMatchCard(p){
+    _matchPartner={name:p.name,init:p.init,color:p.color,score:p.score};
+    document.getElementById('m-av').textContent=p.init;document.getElementById('m-av').style.background=p.color;
+    document.getElementById('m-name').textContent=`${p.name} · ⚡ ${p.score}`;
+    addToMatches(p);
+    showModal('match-modal');
+  }
+
+  // Modals
+  function showModal(id){
+    // Reset state on certain modals
+    if(id==='vibecheck-modal'){
+      document.querySelectorAll('#vibecheck-modal .vibe-option').forEach(o=>o.classList.remove('sel-pos','sel-neg'));
+    }
+    if(id==='edit-profile-modal'){
+      // Aplica preview do avatar atual
+      setTimeout(applyUserAvatar,30);
+    }
+    const el=document.getElementById(id);if(el)el.classList.add('visible');
+  }
+  function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('visible');}
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('visible');}));
+  // ESC fecha qualquer modal aberto
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.visible').forEach(m=>m.classList.remove('visible'));});
+
+  function openBooking(name,price){document.getElementById('bk-title').textContent=name;document.getElementById('bk-price').textContent=price;showModal('booking-modal');}
+  function selTime(el){
+    if(el.classList.contains('taken'))return;
+    // Selecionar só entre time slots (grid de horários), preservando o dia
+    document.querySelectorAll('#booking-modal .time-slots .time-slot').forEach(t=>t.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function selDay(el){
+    // Selecionar só entre os chips de dia
+    el.parentElement.querySelectorAll('.time-slot').forEach(t=>t.classList.remove('selected'));
+    el.classList.add('selected');
+    // Selecionar primeiro horário livre como padrão
+    const first=document.querySelector('#booking-modal .time-slots .time-slot:not(.taken)');
+    document.querySelectorAll('#booking-modal .time-slots .time-slot').forEach(t=>t.classList.remove('selected'));
+    if(first)first.classList.add('selected');
+  }
+  function confirmBooking(){closeModal('booking-modal');showToast('✅ Reserva confirmada! QR Code PIX gerado.');}
+  function tv(el,type){const cls=type==='pos'?'sel-pos':'sel-neg';el.classList.toggle(cls);}
+  function selSport(el){document.querySelectorAll('.sport-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+
+  // Ranking por esporte
+  const rankingData = {
+    geral:   [{i:'R',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Rafael S.',s:97},{i:'A',bg:'linear-gradient(135deg,#FF4D6D,#C1121F)',n:'Ana C.',s:93},{i:'L',bg:'linear-gradient(135deg,#CD7F32,#8B5E3C)',n:'Lucas M.',s:91},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:85,you:true},{i:'F',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Felipe B.',s:82}],
+    futsal:  [{i:'R',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Rafael S.',s:97},{i:'L',bg:'linear-gradient(135deg,#CD7F32,#8B5E3C)',n:'Lucas M.',s:85},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:83,you:true},{i:'P',bg:'linear-gradient(135deg,#8B5CF6,#6C63FF)',n:'Pedro A.',s:79},{i:'C',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Carlos F.',s:71}],
+    padel:   [{i:'A',bg:'linear-gradient(135deg,#FF4D6D,#C1121F)',n:'Ana C.',s:93},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:88,you:true},{i:'J',bg:'linear-gradient(135deg,#8B5CF6,#6C63FF)',n:'Juliana K.',s:84},{i:'D',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Diego R.',s:77},{i:'F',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Fernanda S.',s:70}],
+    volei:   [{i:'L',bg:'linear-gradient(135deg,#CD7F32,#8B5E3C)',n:'Lucas M.',s:91},{i:'B',bg:'linear-gradient(135deg,#FF4D6D,#C1121F)',n:'Beatriz A.',s:89},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:82,you:true},{i:'S',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Sofia L.',s:76},{i:'G',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Miguel P.',s:68}],
+    beach:   [{i:'A',bg:'linear-gradient(135deg,#FF4D6D,#C1121F)',n:'Ana C.',s:88},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:86,you:true},{i:'R',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Rodrigo S.',s:81},{i:'C',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Camila F.',s:74},{i:'B',bg:'linear-gradient(135deg,#8B5CF6,#6C63FF)',n:'Bruno K.',s:67}],
+    basquete:[{i:'T',bg:'linear-gradient(135deg,#FFB703,#FF6B35)',n:'Thiago V.',s:94},{i:'R',bg:'linear-gradient(135deg,#FF4D6D,#C1121F)',n:'Renata O.',s:87},{i:'F',bg:'linear-gradient(135deg,#06D6A0,#00A878)',n:'Felipe B.',s:82},{i:'M',bg:'linear-gradient(135deg,#6C63FF,#8B5CF6)',n:'Você',s:79,you:true},{i:'K',bg:'linear-gradient(135deg,#CD7F32,#8B5E3C)',n:'Kaique S.',s:73}],
+  };
+  const medals=['🥇','🥈','🥉'];
+  function renderRanking(key){
+    const list=document.getElementById('rank-list');if(!list)return;
+    const data=rankingData[key]||rankingData.geral;
+    list.innerHTML=data.map((p,i)=>{
+      const isYou=!!p.you;
+      const unlocked=isYou||canOpenProfile(p.n);
+      const lockIcon=(!isYou && !unlocked)?'<span style="font-size:12px;margin-left:6px;opacity:0.6" title="Jogue para desbloquear">🔒</span>':'';
+      const clickHandler=(!isYou&&unlocked)?` onclick="openPlayerByName('${p.n.replace(/'/g,"\\'")}')" style="cursor:pointer"`:
+                          (!isYou&&!unlocked)?` onclick="showToast('🔒 Jogue ou dê match com ${p.n.replace(/'/g,"\\'")} para ver o perfil')" style="cursor:pointer"`:'';
+      return `<div class="ranking-item${isYou?' ranking-you':''}"${clickHandler}>
+        <span class="ranking-pos" style="${i<3?`color:${['var(--gold)','var(--silver)','var(--bronze)'][i]};font-size:16px`:''}">
+          ${i<3?medals[i]:i+1}</span>
+        <div class="ranking-mini-avatar" style="background:${p.bg}">${p.i}</div>
+        <span class="ranking-name" style="${isYou?'color:var(--primary);font-weight:700':''}">
+          ${p.n}${isYou?' 👈':''}${lockIcon}</span>
+        <span class="ranking-score">⚡ ${p.s}</span></div>`;
+    }).join('');
+  }
+  function setRankTab(btn,key){
+    document.querySelectorAll('.rank-sport-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');renderRanking(key);
+  }
+
+  // Matches list (declarado ANTES de renderRanking — canOpenProfile lê matchesList)
+  const matchesList=[];
+  renderRanking('geral');
+
+  function addToMatches(p){
+    if(matchesList.find(m=>m.name===p.name))return;
+    matchesList.push(p);
+    renderMatchesList();
+    // update badge
+    const b=document.getElementById('msg-badge');
+    b.textContent=matchesList.length;b.style.display='flex';
+    // re-render ranking to destravar perfil deste jogador
+    const activeRankTab=document.querySelector('.rank-sport-tab.active');
+    if(activeRankTab){
+      const onclickStr=activeRankTab.getAttribute('onclick')||'';
+      const m=onclickStr.match(/'([^']+)'/);
+      if(m)renderRanking(m[1]);
+    }
+  }
+  function renderMatchesList(){
+    const el=document.getElementById('matches-list');
+    if(!el)return;
+    if(matchesList.length===0){
+      el.innerHTML=`<div class="msg-empty"><div class="msg-empty-icon">💜</div><div class="msg-empty-text">Nenhum match ainda</div><div class="msg-empty-sub">Dê swipe right em jogadores para dar match e conversar.</div></div>`;
+      return;
+    }
+    el.innerHTML=matchesList.map(p=>`
+      <div class="conv-item" onclick="_matchPartner={name:'${p.name.replace(/'/g,"\\'")}',init:'${p.init}',color:'${p.color}',score:${p.score}};openMatchChat()">
+        <div class="conv-av" style="background:${p.color};position:relative">${p.init}<div class="conv-online"></div></div>
+        <div class="conv-info"><div class="conv-name">${p.name}</div><div class="conv-last">Vocês deram match! Diga olá 👋</div></div>
+        <div class="conv-meta"><div class="conv-time">agora</div><div class="conv-unread">1</div></div>
+      </div>`).join('');
+  }
+
+  // Chat 1-on-1
+  let _matchPartner={name:'Rafael S.',init:'R',color:'linear-gradient(135deg,#06D6A0,#00A878)',score:92};
+  function openMatchChat(){
+    document.getElementById('chat-av').textContent=_matchPartner.init;
+    document.getElementById('chat-av').style.background=_matchPartner.color;
+    document.getElementById('chat-name').textContent=_matchPartner.name;
+    document.getElementById('chat-score').textContent='⚡ '+_matchPartner.score;
+    const msgs=document.getElementById('chat-messages');
+    msgs.innerHTML=`<div class="chat-date-divider">Hoje</div>
+      <div class="chat-msg chat-them"><div class="chat-bubble">Oi! Vi que a gente deu match 😄 Bora marcar um jogo?</div><span class="chat-time">agora</span></div>`;
+    showModal('chat-modal');
+    setTimeout(()=>msgs.scrollTop=msgs.scrollHeight,100);
+  }
+  function sendChatMsg(){
+    const inp=document.getElementById('chat-input'),msg=inp.value.trim();if(!msg)return;
+    const msgs=document.getElementById('chat-messages');
+    msgs.innerHTML+=`<div class="chat-msg chat-me"><div class="chat-bubble">${msg}</div><span class="chat-time">agora</span></div>`;
+    inp.value='';msgs.scrollTop=msgs.scrollHeight;
+    const replies=['👍 Combinado!','Que horas você pode?','Top! Qual quadra preferir?','Manda o local 📍','Show! Vou confirmar aqui no app.'];
+    setTimeout(()=>{msgs.innerHTML+=`<div class="chat-msg chat-them"><div class="chat-bubble">${replies[Math.floor(Math.random()*replies.length)]}</div><span class="chat-time">agora</span></div>`;msgs.scrollTop=msgs.scrollHeight;},1200);
+  }
+
+  // Membros das partidas (usado pelo chat de grupo)
+  const partidaMembers={
+    'Futsal Society':[
+      {name:'Mateus (Você)',init:'M',color:'#6C63FF',self:true},
+      {name:'Rafael S.',init:'R',color:'#06D6A0'},
+      {name:'Carlos F.',init:'C',color:'#FFB703'},
+      {name:'Ana C.',init:'A',color:'#FF4D6D'},
+      {name:'Lucas M.',init:'L',color:'#8B5CF6'},
+    ],
+    'Padel Dupla':[
+      {name:'Mateus (Você)',init:'M',color:'#6C63FF',self:true},
+      {name:'Juliana K.',init:'J',color:'#06D6A0'},
+      {name:'Kaique S.',init:'K',color:'#FFB703'},
+      {name:'Fernanda S.',init:'F',color:'#FF4D6D'},
+    ],
+    'Basquete 5x5':[
+      {name:'Mateus (Você)',init:'M',color:'#6C63FF',self:true},
+      {name:'Pedro A.',init:'P',color:'#8B5CF6'},
+    ],
+  };
+  let _curGroupName='Futsal Society';
+
+  // Chat de grupo (partida)
+  function openGroupChat(nome, icone){
+    _curGroupName=nome;
+    document.getElementById('gc-av').textContent=icone;
+    document.getElementById('gc-name').textContent=nome;
+    const members=partidaMembers[nome]||[];
+    document.getElementById('gc-count').textContent=members.length||5;
+    const msgs=document.getElementById('gc-messages');
+    msgs.innerHTML=`<div class="chat-date-divider">Hoje</div>
+      <div class="chat-msg chat-them"><div class="chat-bubble">Pessoal, que horas encontramos antes da partida?</div><span class="chat-time">Rafael</span></div>
+      <div class="chat-msg chat-them"><div class="chat-bubble">Eu chego uns 15min antes! 💪</div><span class="chat-time">Ana</span></div>`;
+    showModal('group-chat-modal');
+    setTimeout(()=>msgs.scrollTop=msgs.scrollHeight,100);
+  }
+  function sendGcMsg(){
+    const inp=document.getElementById('gc-input'),msg=inp.value.trim();if(!msg)return;
+    const msgs=document.getElementById('gc-messages');
+    msgs.innerHTML+=`<div class="chat-msg chat-me"><div class="chat-bubble">${msg}</div><span class="chat-time">Você</span></div>`;
+    inp.value='';msgs.scrollTop=msgs.scrollHeight;
+    const replies=['👍','Boa!','Combinado!','Vou estar lá! ⚡','Confirmado 🏆'];
+    setTimeout(()=>{msgs.innerHTML+=`<div class="chat-msg chat-them"><div class="chat-bubble">${replies[Math.floor(Math.random()*replies.length)]}</div><span class="chat-time">Carlos</span></div>`;msgs.scrollTop=msgs.scrollHeight;},900);
+  }
+
+  // Modal de membros da partida
+  function openGroupMembers(){
+    const members=partidaMembers[_curGroupName]||[];
+    document.getElementById('gm-title').textContent=_curGroupName;
+    document.getElementById('gm-sub').textContent=members.length+' jogadores confirmados';
+    const list=document.getElementById('gm-list');
+    list.innerHTML=members.map(m=>{
+      const cleanName=m.self?'Mateus':m.name;
+      const unlocked=m.self||canOpenProfile(cleanName);
+      const lockBadge=(!m.self&&!unlocked)?'<span style="font-size:11px;color:var(--text3);background:var(--surface2);padding:2px 8px;border-radius:10px;margin-left:auto">🔒 Bloqueado</span>':'';
+      const onclickAttr=m.self
+        ? `onclick="closeModal('group-members-modal');showToast('👤 Esse é você!')"`
+        : unlocked
+          ? `onclick="closeModal('group-members-modal');setTimeout(()=>openPlayerByName('${cleanName.replace(/'/g,"\\'")}'),200)"`
+          : `onclick="showToast('🔒 Jogue ou dê match com ${cleanName.replace(/'/g,"\\'")} para ver o perfil')"`;
+      return `<div class="conv-item" ${onclickAttr} style="border-bottom:1px solid var(--border);padding:12px 4px">
+        <div class="conv-av" style="background:${m.color};width:42px;height:42px;font-size:15px">${m.init}</div>
+        <div class="conv-info">
+          <div class="conv-name">${m.name}</div>
+          <div class="conv-last">${m.self?'Você está nesta partida':'Toque para ver o perfil'}</div>
+        </div>
+        ${lockBadge}
+      </div>`;
+    }).join('');
+    showModal('group-members-modal');
+  }
+
+  // Verifica se o user pode "ver" o perfil deste jogador (jogou ou deu match)
+  function canOpenProfile(name){
+    if(matchesList.find(m=>m.name===name))return true;
+    const p=playerDirectory[name];
+    return !!(p && p.played);
+  }
+
+  // Abre perfil pelo nome (consulta playerDirectory)
+  function openPlayerByName(name){
+    const p=playerDirectory[name];
+    if(!p){
+      showToast('🔒 Perfil não disponível ainda');
+      return;
+    }
+    if(!canOpenProfile(name)){
+      showToast('🔒 Jogue ou dê match com '+name+' para ver o perfil');
+      return;
+    }
+    openPlayerProfile({name,init:p.init,color:p.color,rank:p.rank,score:p.score,age:p.age,dist:p.dist,sports:p.sports,vibes:p.vibes,v:true});
+  }
+
+  // Perfil detalhado do jogador
+  function openPlayerProfile(d){
+    document.getElementById('pp-av').textContent=d.init;
+    document.getElementById('pp-av').style.background=d.color;
+    document.getElementById('pp-bg').style.background=d.color;
+    document.getElementById('pp-name').textContent=d.name;
+    document.getElementById('pp-rank').textContent=d.rank==='gold'?'🥇 Ouro':d.rank==='silver'?'🥈 Prata':'🥉 Bronze';
+    document.getElementById('pp-rank').className='player-rank-badge rank-'+d.rank;
+    document.getElementById('pp-score').textContent='⚡ '+d.score;
+    document.getElementById('pp-meta').textContent=d.age+' anos · 📍 '+d.dist;
+    document.getElementById('pp-sports').innerHTML=d.sports.map(s=>`<span class="stag">${s}</span>`).join('');
+    document.getElementById('pp-vibes').innerHTML=d.vibes.map(v=>`<span class="vtag">${v}</span>`).join('');
+    _matchPartner={name:d.name,init:d.init,color:d.color,score:d.score};
+    showModal('player-profile-modal');
+  }
+
+  // Detalhe da partida
+  function openPartidaDetail(d){
+    document.getElementById('pd-sport-icon').textContent=d.sport;
+    document.getElementById('pd-name').textContent=d.name;
+    document.getElementById('pd-level').textContent=d.level;
+    document.getElementById('pd-date').textContent=d.date;
+    document.getElementById('pd-local').textContent=d.local+' · '+d.dist;
+    document.getElementById('pd-score').textContent='⚡ '+d.minScore;
+    document.getElementById('pd-players').innerHTML=d.players.map((p,i)=>`<div class="mini-avatar" style="background:${d.colors[i]||'#6C63FF'}">${p}</div>`).join('');
+    document.getElementById('pd-vagas').textContent='+'+d.vagas+' vagas';
+    showModal('partida-detail-modal');
+  }
+
+  // Agenda: expandir card
+  function toggleAgenda(card){
+    const exp=card.querySelector('.agenda-expand');
+    if(exp)exp.classList.toggle('open');
+  }
+
+  // Quadras: filtrar por esporte
+  function filterQuadras(sport,btn){
+    document.querySelectorAll('#quadras-filters .sport-pill').forEach(p=>p.classList.remove('active'));
+    if(btn)btn.classList.add('active');
+    document.querySelectorAll('.quadra-card').forEach(card=>{
+      if(sport==='todos'){card.style.display='';return;}
+      const sports=(card.dataset.sports||'').toLowerCase();
+      card.style.display=sports.includes(sport.toLowerCase())?'':'none';
+    });
+    const visible=[...document.querySelectorAll('.quadra-card')].filter(c=>c.style.display!=='none');
+    if(visible.length===0)showToast('Nenhuma quadra disponível para esse esporte');
+  }
+
+  // Editar perfil
+  function saveProfile(){
+    const name=document.getElementById('ep-name').value||'Mateus';
+    closeModal('edit-profile-modal');
+    showToast('✅ Perfil atualizado, '+name+'!');
+  }
+
+  // Marcar notificações como lidas
+  function markAllNotifsRead(){
+    document.querySelectorAll('#notifications-modal .notif-unread').forEach(d=>d.style.display='none');
+    showToast('✅ Todas marcadas como lidas');
+  }
+
+  // Upload de foto de perfil
+  function handleAvatarUpload(event){
+    const file=event.target.files&&event.target.files[0];
+    if(!file)return;
+    if(!file.type.startsWith('image/')){showToast('⚠️ Selecione uma imagem');return;}
+    if(file.size>5*1024*1024){showToast('⚠️ Imagem muito grande (máx 5MB)');return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      userAvatar=e.target.result;
+      applyUserAvatar();
+      showToast('✅ Foto atualizada!');
+    };
+    reader.onerror=()=>showToast('❌ Erro ao ler imagem');
+    reader.readAsDataURL(file);
+  }
+  function clearUserAvatar(){
+    userAvatar=null;
+    applyUserAvatar();
+    const inp=document.getElementById('ep-avatar-input');if(inp)inp.value='';
+    showToast('🗑️ Foto removida');
+  }
+  function applyUserAvatar(){
+    const avatars=[
+      document.querySelector('.profile-avatar'),
+      document.querySelector('#match-modal .match-avatar.user-avatar'),
+      document.getElementById('ep-avatar-preview'),
+    ];
+    document.querySelectorAll('.mini-avatar.user-avatar').forEach(a=>avatars.push(a));
+    avatars.forEach(a=>{
+      if(!a)return;
+      if(userAvatar){
+        a.style.backgroundImage=`url('${userAvatar}')`;
+        a.style.backgroundSize='cover';
+        a.style.backgroundPosition='center';
+        a.dataset._initial=a.dataset._initial||a.textContent;
+        a.textContent='';
+      } else {
+        a.style.backgroundImage='';
+        if(a.dataset._initial)a.textContent=a.dataset._initial;
+      }
+    });
+  }
+
+  // PWA Service Worker
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+
+  // Toast
+  let tt;
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(tt);
+    tt=setTimeout(()=>t.classList.remove('show'),2800);
+  }
+</script>
+</body>
+</html>
