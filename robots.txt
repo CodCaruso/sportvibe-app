@@ -1,0 +1,6 @@
+# SportVibe — site em fase pré-lançamento
+# Bloqueio total de indexação até o lançamento oficial.
+# Para remover: deletar este arquivo ou trocar Disallow por Allow.
+
+User-agent: *
+Disallow: /
